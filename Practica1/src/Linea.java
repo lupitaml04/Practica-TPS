@@ -29,25 +29,43 @@ public class Linea{
         if (mat.matches()) {
         	return true;
          } else {
-        	p.escribirError(lin+"	la etiqueta	"+ eti+"	no es valida	\r\n",archierr);
+        	p.escribirError(lin+"\tLa etiqueta no es valida\r\n",archierr);
         	return false;
           }
 	}
 	
 	public boolean validarCodigo(String cod){
 		codigo=cod;
-		Pattern pat = Pattern.compile("[a-zA-Z][a-zA-Z.?]{1,4}");
-        Matcher mat = pat.matcher(codigo);
+		String error;
+		if(codigo.length() >5)
+		{
+			p.escribirError(lin+"\tEl codop   no   es valida\r\n",archierr);       	    
+			return false;}
+			else
+			{
+				Pattern pat = Pattern.compile("[a-zA-Z]{1,}[.]?[a-zA-Z]*");
+                Matcher mat = pat.matcher(codigo);
                if (mat.matches()) {
                	return true;       	
-               } else {
-               	p.escribirError(lin+"	El codigo de operacion	"+ codigo +"	no es valido\r\n",archierr);
-        	    return false;
+               } else {      	
+			     p.escribirError(lin+"\tEl codop  no   es valido\r\n",archierr);
+        	     return false;
                 }
+			}
+				
+		
+		
 		}
 		
 	public boolean validarOperando(String oper){
 		operando=oper;		
-		return true;
+	     Pattern pat = Pattern.compile(".*");
+                Matcher mat = pat.matcher(operando);
+               if (mat.matches()) {
+               	return true;       	
+               } else {      	
+			     p.escribirError(lin+"\tEl operando  no   es valido\r\n",archierr);
+        	     return false;
+                }
 		}
 }
