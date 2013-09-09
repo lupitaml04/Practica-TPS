@@ -1,7 +1,7 @@
 /**
  * @(#)Practica1.java
  * Practica1 application
- * @Muñoz Loera María Guadalupe
+ * @Muï¿½oz Loera Marï¿½a Guadalupe
  * Codigo: 208560943
  * @version 1.00 2013/8/24
  */
@@ -11,7 +11,7 @@ import java.io.*;
 
 public class Practica1 {
 	String ruta, texto, archivo,archivoInst,archivoErr;
-	int linea =-1;
+	int linea =0;
 	boolean end;
 
 	public Practica1(String r){
@@ -76,7 +76,7 @@ public class Practica1 {
 		    }
 		    if(!end)
 		    	escribirError("	No hay END",archivoErr);
-		    	
+
 		    archi.close();
 		    }
 	        catch(IOException e){
@@ -137,7 +137,7 @@ public class Practica1 {
      	         	}
      	         	else
      	         		if(cad[cont]==';'){
-     	         			escribirError(linea+"	No hay codigo de operacion\r\n",archivoErr);
+     	         			escribirError(linea+"	Linea incorrecta\r\n",archivoErr);
      	         			edo=1;
      	         			cont++;
      	         		}
@@ -173,6 +173,10 @@ public class Practica1 {
                                 	if(subStr.toUpperCase().equals("END")){
                                 		end=true;
                                 		edo=10;
+                                		codop=subStr;
+                                		cod=true;
+                                		op=true;
+                                		oper="NULL";
                                 	}
      	         				}
      	         				if(!end){
@@ -204,6 +208,10 @@ public class Practica1 {
                                 	if(subStr.toUpperCase().equals("END")){
                                 		end=true;
                                 		edo=10;
+                                		codop=subStr;
+                                		cod=true;
+                                		op=true;
+                                		oper="NULL";
                                 	}
      	         				}
      	         				if(!end){
@@ -306,6 +314,7 @@ public class Practica1 {
      	         			}
      	         			else{
      	         				escribirError(linea+"	Exceso    de    tokens\r\n",archivoErr);
+     	         				op=false;
      	         				edo=10;
      	         			}
      	         break;
@@ -344,7 +353,7 @@ public class Practica1 {
     public static void main(String[] args){
     	Scanner Leer=new Scanner(System.in);
     	String ruta;
-    	System.out.println("¿Cual es la ruta del archivo?");
+    	System.out.println("Â¿Cual es la ruta del archivo?");
     	ruta=Leer.nextLine();
     	Practica1 obj= new Practica1(ruta);
     	obj.validarRuta();
