@@ -39,7 +39,7 @@ public class Linea{
 		String error;
 		if(codigo.length() >5)
 		{
-			p.escribirError(lin+"\tEl codop   no   es valida\r\n",archierr);       	    
+			p.escribirError(lin+"\tEl codop  no   es valido\r\n",archierr);       	    
 			return false;}
 			else
 			{

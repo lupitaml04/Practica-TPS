@@ -97,22 +97,22 @@ public class Practica1 {
         			if(cont==tam){
         				edo=10;
         			}else
-        			if(cad[cont]==';'){
-        				edo=1;
-    				    cont++;
-    			    }
-    				else
-    					if(cad[cont]==' ' || cad[cont]=='\t'){
-    						edo=4;
-    						eti="NULL";
-    						etiq=true;
-    						cont++;
-    					}
-    					else{
-    						eti=cad[cont]+"";
-    						cont++;
-    						edo=3;
-    					}
+        				if(cad[cont]==';'){
+        					edo=1;
+    				        cont++;
+    			    	}
+    					else
+    						if(cad[cont]==' ' || cad[cont]=='\t'){
+    							edo=4;
+    							eti="NULL";
+    							etiq=true;
+    							cont++;
+    						}
+    						else{
+    							eti=cad[cont]+"";
+    							cont++;
+    							edo=3;
+    						}
     		     break;
     		     case 1:
     		     	if(tam==cont)
@@ -142,45 +142,45 @@ public class Practica1 {
      	         			cont++;
      	         		}
      	         		else
-     	         	if(cad[cont]==' ' || cad[cont]=='	'){
-     	         		etiq=lin.validarEtiqueta(eti);
-     	         		cont++;
-     	         		edo=5;
-     	         	}
-     	         	else{
-     	         		eti+=cad[cont];
-     	         		        cont++;
-     	         		        edo=3;
-     	         	}
+     	         			if(cad[cont]==' ' || cad[cont]=='\t'){
+     	         				etiq=lin.validarEtiqueta(eti);
+     	         				cont++;
+     	         				edo=5;
+     	         			}
+     	         			else{
+     	         				eti+=cad[cont];
+     	         		    	cont++;
+     	         		    	edo=3;
+     	         	    	}
      	         break;
      	         case 4:
      	         	if(tam==cont){
      	         		edo=10;
      	         	}
      	         	else
-     	         	if(cad[cont]==';'){
-     	         	edo=1;
-     	         	cont++;
-     	         	}
-     	         	else
-     	         		if(cad[cont]==' ' || cad[cont]=='\t'){
+     	         		if(cad[cont]==';'){
+     	         			edo=1;
      	         			cont++;
-     	         			edo=4;
      	         		}
-     	         		else{
-     	         			if((cad[cont]=='E'||cad[cont]=='e')&& (cont+3)<=tam){
-     	         				String subStr=texto.substring(cont, cont+3);
-                                if(subStr.toUpperCase().equals("END")){
-                                	end=true;
-                                	edo=10;
-                                }
+     	         		else
+     	         			if(cad[cont]==' ' || cad[cont]=='\t'){
+     	         				cont++;
+     	         				edo=4;
      	         			}
-     	         			if(!end){
-     	         			codop=cad[cont]+"";
-     	         			cont++;
-     	         			edo=6;
+     	         			else{
+     	         				if((cad[cont]=='E'||cad[cont]=='e')&& (cont+3)<=tam){
+     	         					String subStr=texto.substring(cont, cont+3);
+                                	if(subStr.toUpperCase().equals("END")){
+                                		end=true;
+                                		edo=10;
+                                	}
+     	         				}
+     	         				if(!end){
+     	         					codop=cad[cont]+"";
+     	         					cont++;
+     	         					edo=6;
+     	         				}
      	         			}
-     	         		}
      	         break;
      	         case 5:
      	         	if(tam==cont){
@@ -194,24 +194,24 @@ public class Practica1 {
      	                    cont++;
      	         		}
      	         		else
-     	         	if(cad[cont]==' '|| cad[cont]=='\t'){
-     	         		cont++;
-     	         		edo=5;
-     	         	}
-     	         	else{
-     	         		if((cad[cont]=='E'||cad[cont]=='e')&& (cont+3)<=tam){
-     	         				String subStr=texto.substring(cont, cont+3);
-                                if(subStr.toUpperCase().equals("END")){
-                                	end=true;
-                                	edo=10;
-                                }
+     	         			if(cad[cont]==' '|| cad[cont]=='\t'){
+     	         				cont++;
+     	         				edo=5;
      	         			}
-     	         			if(!end){
-     	         			codop=cad[cont]+"";
-     	         			cont++;
-     	         			edo=6;
+     	         			else{
+     	         				if((cad[cont]=='E'||cad[cont]=='e')&& (cont+3)<=tam){
+     	         					String subStr=texto.substring(cont, cont+3);
+                                	if(subStr.toUpperCase().equals("END")){
+                                		end=true;
+                                		edo=10;
+                                	}
+     	         				}
+     	         				if(!end){
+     	         					codop=cad[cont]+"";
+     	         					cont++;
+     	         					edo=6;
+     	         				}
      	         			}
-     	         	}
      	         break;
      	         case 6:
      	         	if(tam==cont){
@@ -221,23 +221,23 @@ public class Practica1 {
      	         		oper="NULL";
      	         	}
      	         	else
-     	         	if(cad[cont]==';'){
-     	         		edo=1;
-     	         		cod=lin.validarCodigo(codop);
-     	         		op=true;
-     	         		oper="NULL";
-     	         	}
-     	         	else
-     	         	if(cad[cont]==' '|| cad[cont]=='\t'){
-     	         		cod=lin.validarCodigo(codop);
-     	         		cont++;
-     	         		edo=7;
-     	         	}
-     	         	else{
-     	         		codop=codop+cad[cont];
-     	         		edo=6;
-     	         		cont++;
-     	         	}
+     	         		if(cad[cont]==';'){
+     	         			edo=1;
+     	         			cod=lin.validarCodigo(codop);
+     	         			op=true;
+     	         			oper="NULL";
+     	         		}
+     	         		else
+     	         			if(cad[cont]==' '|| cad[cont]=='\t'){
+     	         				cod=lin.validarCodigo(codop);
+     	         				cont++;
+     	         				edo=7;
+     	         			}
+     	         			else{
+     	         				codop=codop+cad[cont];
+     	         				edo=6;
+     	         				cont++;
+     	         			}
      	         break;
      	         case 7:
      	         	if(tam==cont){
@@ -246,23 +246,22 @@ public class Practica1 {
      	         		edo=10;
      	         	}
      	         	else
-     	         	if(cad[cont]==' '|| cad[cont]=='\t'){
-     	         		cont++;
-     	         		edo=7;
-     	         	}
-     	         	else
-     	         		if(cad[cont]==';'){
+     	         		if(cad[cont]==' '|| cad[cont]=='\t'){
      	         			cont++;
-     	         			edo=1;
-     	         			op=true;
-     	         			oper="NULL";
+     	         			edo=7;
      	         		}
-     	         	else{
-
-     	         		oper=cad[cont]+"";
-     	         		cont++;
-     	         		edo=8;
-     	         	}
+     	         		else
+     	         			if(cad[cont]==';'){
+     	         				cont++;
+     	         				edo=1;
+     	         				op=true;
+     	         				oper="NULL";
+     	         			}
+     	         			else{
+     	         				oper=cad[cont]+"";
+     	         				cont++;
+     	         				edo=8;
+     	         			}
      	         break;
      	         case 8:
      	         	if(tam==cont){
@@ -276,21 +275,21 @@ public class Practica1 {
      	         			cont++;
      	         		}
      	         		else
-     	         	if(cad[cont]==' ' || cad[cont]=='\t'){
-     	         		op=lin.validarOperando(oper);
-     	         		cont++;
-     	         		edo=9;
-     	         	}
-     	         	else
-     	         	if(cad[cont]==';'){
-     	         		op=lin.validarOperando(oper);
-     	         		cont++;
-     	         		edo=1;
-     	         	}
-     	         	else{
-     	         		oper+=cad[cont];
-     	         		cont++;
-     	         	}
+     	         			if(cad[cont]==' ' || cad[cont]=='\t'){
+     	         				op=lin.validarOperando(oper);
+     	         				cont++;
+     	         				edo=9;
+     	         			}
+     	         			else
+     	         				if(cad[cont]==';'){
+     	         					op=lin.validarOperando(oper);
+     	         					cont++;
+     	         					edo=1;
+     	         				}
+     	         				else{
+     	         					oper+=cad[cont];
+     	         					cont++;
+     	         				}
      	         break;
      	         case 9:
      	         	if(tam==cont){
@@ -306,7 +305,8 @@ public class Practica1 {
      	         				edo=1;
      	         			}
      	         			else{
-     	         				escribirError(linea+"Exceso de tokens\r\n",archivoErr);
+     	         				escribirError(linea+"	Exceso    de    tokens\r\n",archivoErr);
+     	         				edo=10;
      	         			}
      	         break;
      }
