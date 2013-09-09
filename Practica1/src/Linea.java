@@ -24,14 +24,25 @@ public class Linea{
 	
 	public boolean  validarEtiqueta(String eti){
 		etiqueta=eti;
-		Pattern pat = Pattern.compile("^[a-zA-Z][a-zA-Z_0-9]{0,7}");
+		        if(etiqueta.length()>8)
+		{
+			p.escribirError(lin+"\tLa etiqueta se excedio en longitud\r\n",archierr);
+			return false;}
+			else
+			{
+				Pattern pat = Pattern.compile("^[a-zA-Z][a-zA-Z_0-9]{0,7}");
         Matcher mat = pat.matcher(etiqueta);
-        if (mat.matches()) {
+               if (mat.matches()) {
         	return true;
          } else {
         	p.escribirError(lin+"\tLa etiqueta no es valida\r\n",archierr);
         	return false;
           }
+			}
+
+
+
+
 	}
 	
 	public boolean validarCodigo(String cod){
@@ -39,7 +50,7 @@ public class Linea{
 		String error;
 		if(codigo.length() >5)
 		{
-			p.escribirError(lin+"\tEl codop  no   es valido\r\n",archierr);       	    
+			p.escribirError(lin+"\tEl codop  se excedio en longitud\r\n",archierr);       	    
 			return false;}
 			else
 			{
