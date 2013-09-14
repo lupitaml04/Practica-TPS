@@ -19,7 +19,7 @@
 			<applet_ref/>
 			<debugger_ref/>
 			<param/>
-			<run/>
+			<run>Ensamblador</run>
 			<verify>true</verify>
 		</runtime>
 	</runtimes>
@@ -35,6 +35,10 @@
 			</fileitem>
 			<fileitem>
 				<path>src\Linea.java</path>
+				<folder>src</folder>
+			</fileitem>
+			<fileitem>
+				<path>src\Tabop.java</path>
 				<folder>src</folder>
 			</fileitem>
 		</include>

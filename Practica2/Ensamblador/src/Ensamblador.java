@@ -12,7 +12,7 @@ import java.io.*;
 
  class Ensamblador {
 	String ruta, texto, archivo,archivoInst,archivoErr;
-	Vector tabop=new Vector();
+	Vector<Tabop> tabop=new Vector<Tabop>();
 	int linea =0;
 	boolean end;
 
@@ -27,8 +27,8 @@ import java.io.*;
 		File fichero = new File(ruta);
         if (fichero.exists())
         {
-        	if(fichero.getName().toUpperCase().endsWith(".ASM"))
-        	{
+        	if(fichero.getName().toUpperCase().endsWith(".ASM")){
+        		leerTabop();
         	    crearArchivos();
         	    leerArchivo();
         	}
@@ -51,17 +51,17 @@ import java.io.*;
 		 if(err.exists())
 		 	err.delete();
 		try{
-	 		RandomAccessFile archinst=new RandomAccessFile(archivoInst,"rw");
-			archinst.writeUTF("LINEA\tETQ\tCODOP\tOPER\t\t");
-			archinst.writeUTF("\r\n...........................................................");
+			BufferedWriter archinst = new BufferedWriter(new FileWriter(new File(archivoInst), true));
+			archinst.write("LINEA\tETQ\tCODOP\tOPER\tMODOS");
+			archinst.write("\r\n...........................................................\r\n");
 			archinst.close();
 		}
 	    catch(IOException e){
 					System.out.println("Error");
 	    	}
 	    try{
-			RandomAccessFile archierr=new RandomAccessFile(archivoErr,"rw");
-		 	archierr.writeUTF("\tERRORES\r\n............................................\r\n");
+	    	BufferedWriter archierr = new BufferedWriter(new FileWriter(new File(archivoErr), true));
+		 	archierr.write("\tERRORES\r\n............................................\r\n");
 			archierr.close();
 		}
 	    catch(IOException e2){
@@ -91,7 +91,7 @@ import java.io.*;
 
     public void revisarLinea(){
     	Linea lin= new Linea(linea,archivoErr);
-    	String eti=null, codop=null, oper=null;
+    	String eti=null, codop=null, oper=null, modos=null;
         int cont=0, edo=0, tam=texto.length();
         char[] cad = texto.toCharArray();
         boolean etiq=false, cod=false, op=false;
@@ -113,7 +113,6 @@ import java.io.*;
     								if(cad[cont]==' ' || cad[cont]=='\t')
     									{
     										edo=4;
-    										eti="NULL";
     										etiq=true;
     										cont++;
     									}else
@@ -191,7 +190,6 @@ import java.io.*;
                                 								codop=subStr;
                                 								cod=true;
                                 								op=true;
-                                								oper="NULL";
                                 							}
      	         									}
      	         									if(!end){
@@ -229,7 +227,6 @@ import java.io.*;
                                 								codop=subStr;
                                 								cod=true;
                                 								op=true;
-                                								oper="NULL";
                                 							}
      	         									}
      	         								if(!end){
@@ -245,14 +242,12 @@ import java.io.*;
      	         			cod=lin.validarCodigo(codop);
      	         			edo=10;
      	         			op=true;
-     	         			oper="NULL";
      	         		}else
      	         			if(cad[cont]==';')
      	         				{
      	         					edo=1;
      	         					cod=lin.validarCodigo(codop);
      	         					op=true;
-     	         					oper="NULL";
      	         				}else
      	         					if(cad[cont]==' '|| cad[cont]=='\t')
      	         						{
@@ -269,7 +264,6 @@ import java.io.*;
      	         case 7:
      	         	if(tam==cont)
      	         		{
-     	         			oper="NULL";
      	         			op=true;
      	         			edo=10;
      	         		}else
@@ -283,7 +277,6 @@ import java.io.*;
      	         							cont++;
      	         							edo=1;
      	         							op=true;
-     	         							oper="NULL";
      	         						}else
      	         							{
      	         								oper=cad[cont]+"";
@@ -345,16 +338,23 @@ import java.io.*;
     }
     	if((etiq && cod) && op)
     	{
-       		escribirInstruccion("\r\n"+linea+"\t"+ eti+"\t"+codop+"\t"+oper+"\t\t\t\t");
+    		modos=buscarCodop(codop,oper);
+    	    if(modos != null)
+    			{
+    				if(eti==null)
+    					eti="NULL";
+    				if(oper==null)
+    					oper="NULL";
+    				escribirInstruccion(linea,"\t"+ eti+"\t"+codop+"\t"+oper+"\t"+modos+"\r\n");
+    			}		
     	}
     }
 
     public void escribirError(String error, String archi){
     	archivoErr=archi;
     	try{
-			RandomAccessFile archierr=new RandomAccessFile(archivoErr,"rw");
-			archierr.seek(archierr.length());
-			archierr.writeUTF(error);
+    		BufferedWriter archierr = new BufferedWriter(new FileWriter(new File(archivoErr), true));
+			archierr.write(error);
 			archierr.close();
 		}
 	      catch(IOException e){
@@ -362,11 +362,12 @@ import java.io.*;
 	      }
     }
 
-    public void escribirInstruccion(String instruccion){
+    public void escribirInstruccion(int lin, String instruccion){
+         String l= Integer.toString(lin);  
     	try{
-    		RandomAccessFile archinst=new RandomAccessFile(archivoInst,"rw");
-    		archinst.seek(archinst.length());
-			archinst.writeUTF(instruccion);
+    		BufferedWriter archinst = new BufferedWriter(new FileWriter(new File(archivoInst), true));
+    		archinst.write(l);
+			archinst.write(instruccion);
 			archinst.close();
 		}
 	      catch(IOException e){
@@ -374,17 +375,21 @@ import java.io.*;
 	       }
     }
     
-    public void leerTabop(String rt){
-    	String l;
+    public void leerTabop(){
+    	String l,rt;
+    	Scanner Leer=new Scanner(System.in);
+    	System.out.println("¿Cual es la ruta del archivo tabop?");
+    	rt=Leer.nextLine(); 	
+				
     	try{
     		RandomAccessFile archi=new RandomAccessFile(new File(rt),"r");
-			while(archi.getFilePointer()!=archi.length() && !end)
+			while(archi.getFilePointer()!=archi.length())
 				{
+					Tabop t=new Tabop();
 					l=archi.readLine();
 					StringTokenizer st = new StringTokenizer(l,"|");
-					Tabop t=new Tabop(st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken());
+					t.agregar(st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken());
 					tabop.addElement(t);
-					t.mostrar();
 		   		}
 		   		
 		    	archi.close();
@@ -396,29 +401,53 @@ import java.io.*;
 	       
     }
     
-    /*public void buscarCodop(){
-    	String cod, boper,modir, comaq,bcalcu, bxcalcu, btotal;
-    	boolean bcod;
-    	for(int i=0; i<tabop.size(); i++)
+    public String buscarCodop(String c,String op){
+    	boolean bcod=false,band=true;
+    	int cont=0;
+    	String modos=null;
+    	for(int i=0; i<tabop.size() && band; i++)
     		{
-    			
-				
-			
-				if(cod.equals(c))
+    			Tabop t=new Tabop();
+    			t=tabop.elementAt(i);
+				if(c.toUpperCase().equals(t.cod))
 				{
+					System.out.println(t.cod);
 					bcod=true;
+					cont++;
+					if(cont==1){
+						modos=t.modir;
+						if(t.bxcalcu.equals("1")&& op==null)
+						{
+							escribirError(linea+"\tEl codigo de operacion requiere operando\r\n",archivoErr);
+						}
+						else
+							if(t.bxcalcu.equals("0")&& op!=null)
+							{
+								escribirError(linea+"\tEl codigo de operacion no requiere operando\r\n",archivoErr);
+							}					
+					}
+					else
+					{
+						modos+=","+t.modir;
+					}
 				}
-			}  	
-    }*/
+				else{
+					if(cont>1)
+						band=false;
+				}
+			} 
+	if(!bcod)
+		escribirError(linea+ "\tEl codigo de operacion no se encontra en el tabop\r\n",archivoErr);
+		return modos; 	
+    }
 
     public static void main(String[] args){
     	Scanner Leer=new Scanner(System.in);
-    	String ruta="";
+    	String ruta;
     	System.out.println("¿Cual es la ruta del archivo?");
     	ruta=Leer.nextLine();
     	Ensamblador obj= new Ensamblador(ruta);
-    	//obj.validarRuta();
-    	obj.leerTabop(ruta);
+    	obj.validarRuta();   	
     }
 }
 

@@ -1,7 +1,10 @@
 
 class Tabop {
 	String cod, boper,modir, comaq,bcalcu, bxcalcu, btotal;	
-	public Tabop(String cod,String boper,String modir, String comaq,String bcalcu,String bxcalcu, String btotal){
+	public Tabop(){
+	}	
+		
+	public void agregar(String cod,String boper,String modir, String comaq,String bcalcu,String bxcalcu, String btotal){
 		this.cod=cod;
 		this.boper=boper;
 		this.modir=modir;
