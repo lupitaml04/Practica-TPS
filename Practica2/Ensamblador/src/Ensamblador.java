@@ -405,25 +405,32 @@ import java.io.*;
     	boolean bcod=false,band=true;
     	int cont=0;
     	String modos=null;
+    	if(c.toUpperCase().equals("ORG") || c.toUpperCase().equals("END"))
+    	{
+    		return " ";
+    	}
+    	
     	for(int i=0; i<tabop.size() && band; i++)
     		{
     			Tabop t=new Tabop();
     			t=tabop.elementAt(i);
 				if(c.toUpperCase().equals(t.cod))
 				{
-					System.out.println(t.cod);
 					bcod=true;
 					cont++;
-					if(cont==1){
+					if(cont==1)
+					{
 						modos=t.modir;
-						if(t.bxcalcu.equals("1")&& op==null)
+						if(t.boper.equals("1")&& op==null)
 						{
 							escribirError(linea+"\tEl codigo de operacion requiere operando\r\n",archivoErr);
+							return null;
 						}
 						else
-							if(t.bxcalcu.equals("0")&& op!=null)
+							if(t.boper.equals("0")&& op!=null)
 							{
 								escribirError(linea+"\tEl codigo de operacion no requiere operando\r\n",archivoErr);
+								return null;
 							}					
 					}
 					else
@@ -431,13 +438,16 @@ import java.io.*;
 						modos+=","+t.modir;
 					}
 				}
-				else{
+				else
+				{
 					if(cont>1)
 						band=false;
 				}
 			} 
-	if(!bcod)
-		escribirError(linea+ "\tEl codigo de operacion no se encontra en el tabop\r\n",archivoErr);
+	    if(!bcod)
+	    {
+	    	escribirError(linea+ "\tEl codigo de operacion no se encontra en el tabop\r\n",archivoErr);
+	    }
 		return modos; 	
     }
 

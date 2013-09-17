@@ -1,6 +1,7 @@
 
 class Tabop {
 	String cod, boper,modir, comaq,bcalcu, bxcalcu, btotal;	
+		
 	public Tabop(){
 	}	
 		
