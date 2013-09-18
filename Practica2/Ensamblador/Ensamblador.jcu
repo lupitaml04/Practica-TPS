@@ -13,4 +13,24 @@
 			</folderitem>
 		</project>
 	</projects>
+	<open_files>
+		<docitem>
+			<path>src\Ensamblador.java</path>
+			<source>true</source>
+			<index>0</index>
+			<active>true</active>
+		</docitem>
+		<docitem>
+			<path>src\Linea.java</path>
+			<source>true</source>
+			<index>1</index>
+			<active>false</active>
+		</docitem>
+		<docitem>
+			<path>src\Tabop.java</path>
+			<source>true</source>
+			<index>2</index>
+			<active>false</active>
+		</docitem>
+	</open_files>
 </workspace_user>

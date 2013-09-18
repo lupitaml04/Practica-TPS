@@ -369,7 +369,7 @@ import java.io.*;
     		archinst.write(l);
 			archinst.write(instruccion);
 			archinst.close();
-		}
+		   }
 	      catch(IOException e){
 		    System.out.println("Error");
 	       }
@@ -446,7 +446,7 @@ import java.io.*;
 			} 
 	    if(!bcod)
 	    {
-	    	escribirError(linea+ "\tEl codigo de operacion no se encontra en el tabop\r\n",archivoErr);
+	    	escribirError(linea+ "\tEl codigo de operacion no se encontro en el tabop\r\n",archivoErr);
 	    }
 		return modos; 	
     }
