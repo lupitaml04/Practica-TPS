@@ -1,3 +1,4 @@
-E:\CUCEI\Practica2\Ensamblador\src\Ensamblador.java
-E:\CUCEI\Practica2\Ensamblador\src\Linea.java
-E:\CUCEI\Practica2\Ensamblador\src\Tabop.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica3\Ensamblador\src\Ensamblador.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica3\Ensamblador\src\Linea.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica3\Ensamblador\src\Modos.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica3\Ensamblador\src\Tabop.java

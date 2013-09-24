@@ -338,7 +338,7 @@ import java.io.*;
     }
     	if((etiq && cod) && op)
     	{
-    		modos=buscarCodop(codop,oper);
+    		modos=buscarCodop(lin);
     	    if(modos != null)
     			{
     				if(eti==null)
@@ -376,7 +376,7 @@ import java.io.*;
     }
 
     public void leerTabop(){
-    	String l,rt;
+    	String l,rt, cod,codant=null;
     	Scanner Leer=new Scanner(System.in);
     	System.out.println("¿Cual es la ruta del archivo tabop?");
     	rt=Leer.nextLine();
@@ -385,78 +385,77 @@ import java.io.*;
     		RandomAccessFile archi=new RandomAccessFile(new File(rt),"r");
 			while(archi.getFilePointer()!=archi.length())
 				{
-					Tabop t=new Tabop();
+					
 					l=archi.readLine();
 					StringTokenizer st = new StringTokenizer(l,"|");
-					t.agregar(st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken());
-					tabop.addElement(t);
+					cod=st.nextToken();
+					Tabop t=new Tabop();
+					if(cod.equals(codant))
+					{
+						t=tabop.elementAt(tabop.size()-1);
+						t.agregar(cod, st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken());	
+					}
+					else
+					{
+						t.agregar(cod,st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken());
+						tabop.addElement(t);
+						codant=cod;
+					}
+					
 		   		}
-
 		    	archi.close();
 		    }
 	        catch(IOException e)
 	        	{
 		      		System.out.println("Error");
 	        	}
-
     }
 
-    public String buscarCodop(String c,String op){
-    	boolean bcod=false,band=true;
-    	int cont=0;
-    	Vector <String>  modos=new Vector<String>();
-    	if(c.toUpperCase().equals("ORG") || c.toUpperCase().equals("END"))
+    public String buscarCodop(Linea lin){
+    	boolean bcod=false;
+    	 	   	
+    	if(lin.codigo.toUpperCase().equals("ORG") || lin.codigo.toUpperCase().equals("END"))
     	{
     		return " ";
     	}
 
-    	for(int i=0; i<tabop.size() && band; i++)
+    	for(int i=0; i<tabop.size() && !bcod; i++)
     		{
     			Tabop t=new Tabop();
     			t=tabop.elementAt(i);
-				if(c.toUpperCase().equals(t.cod))
+				if(lin.codigo.toUpperCase().equals(t.cod))
 				{
 					bcod=true;
-					cont++;
-					if(cont==1)
-					{
-						modos.add(t.modir);
-						if(t.boper.equals("1")&& op==null)
+						if(t.boper.elementAt(0).equals("1")&& lin.operando==null)
 						{
 							escribirError(linea+"\tEl codigo de operacion requiere operando\r\n",archivoErr);
 							return null;
 						}
 						else
-							if(t.boper.equals("0")&& op!=null)
+							if(t.boper.elementAt(0).equals("0")&& lin.operando!=null)
 							{
 								escribirError(linea+"\tEl codigo de operacion no requiere operando\r\n",archivoErr);
 								return null;
 							}
-					}
-					else
-					{
-						modos.add(t.modir);
-					}
-				}
-				else
-				{
-					if(cont>1)
-						band=false;
+						else
+						{
+							Modos m=new Modos(lin,t);
+							m.buscarModo();
+						}
 				}
 			}
 	    if(!bcod)
 	    {
 	    	escribirError(linea+ "\tEl codigo de operacion no se encontro en el tabop\r\n",archivoErr);
 	    }
-	    for(int i=0; i< modos.size();i++)
-	    System.out.println(" "+ modos.elementAt(i));
-		return modos.elementAt(0);
+
+	   return "encontrado";
     }
 
 
     public static void main(String[] args){
     	Scanner Leer=new Scanner(System.in);
-    	String ruta;
+    	String ruta="";
     	System.out.println("¿Cual es la ruta del archivo?");
     	ruta=Leer.nextLine();
     	Ensamblador obj= new Ensamblador(ruta);
