@@ -143,7 +143,7 @@ import java.io.*;
      	         case 3:
      	         	if(cont==tam)
      	         		{
-     	             		escribirError(linea+"	No hay Codigo de operacion\r\n",archivoErr);
+     	             		escribirError(linea +"	No hay Codigo de operacion\r\n",archivoErr);
      	         			edo=10;
      	         		}else
      	         			if(cad[cont]==';')
@@ -188,7 +188,7 @@ import java.io.*;
                                 								end=true;
                                 								edo=10;
                                 								codop=subStr;
-                                								cod=true;
+                                								cod=lin.validarCodigo(codop);
                                 								op=true;
                                 							}
      	         									}
@@ -202,12 +202,12 @@ import java.io.*;
      	         case 5:
      	         	if(tam==cont)
      	         		{
-     	         			escribirError("Linea "+ linea+" No hay codigo de operacion ",archivoErr);
+     	         			escribirError(linea+" No hay codigo de operacion\r\n",archivoErr);
      	                	edo=10;
      	         		}else
      	         			if(cad[cont]==';')
      	         				{
-     	         					escribirError("Linea "+ linea+" No hay codigo de operacion ",archivoErr);
+     	         					escribirError(linea+" No hay codigo de operacion \r\n",archivoErr);
      	                    		edo=1;
      	                    		cont++;
      	         				}else
@@ -225,7 +225,7 @@ import java.io.*;
                                 								end=true;
                                 								edo=10;
                                 								codop=subStr;
-                                								cod=true;
+                                								cod=lin.validarCodigo(codop);
                                 								op=true;
                                 							}
      	         									}
@@ -413,6 +413,7 @@ import java.io.*;
 
     public String buscarCodop(Linea lin){
     	boolean bcod=false;
+    	System.out.println(" "+lin.codigo);
     	 	   	
     	if(lin.codigo.toUpperCase().equals("ORG") || lin.codigo.toUpperCase().equals("END"))
     	{
@@ -439,14 +440,16 @@ import java.io.*;
 							}
 						else
 						{
+							System.out.println("buscar modo");
 							Modos m=new Modos(lin,t);
-							m.buscarModo();
+							return m.buscarModo();
 						}
 				}
 			}
 	    if(!bcod)
 	    {
 	    	escribirError(linea+ "\tEl codigo de operacion no se encontro en el tabop\r\n",archivoErr);
+	    	return null;
 	    }
 
 	   return "encontrado";
