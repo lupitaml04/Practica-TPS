@@ -38,11 +38,5 @@
 			<index>3</index>
 			<active>false</active>
 		</docitem>
-		<docitem>
-			<path>..\..\..\..\..\..\..\Program Files\Java\jdk1.7.0_25\src.zip!java\lang\NumberFormatException.java</path>
-			<source>true</source>
-			<index>4</index>
-			<active>false</active>
-		</docitem>
 	</open_files>
 </workspace_user>
