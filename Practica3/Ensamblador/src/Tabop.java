@@ -7,9 +7,7 @@ class Tabop {
 	Vector<String> bcalcu= new Vector<String>();
 	Vector<String> bxcalcu= new Vector<String>();
 	Vector<String> btotal= new Vector<String>();
-		
-
-	
+			
 	public Tabop(){
 	}	
 		

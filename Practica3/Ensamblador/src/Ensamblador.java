@@ -90,8 +90,8 @@ import java.io.*;
 	}
 
     public void revisarLinea(){
-    	Linea lin= new Linea(linea,archivoErr);
-    	String eti=null, codop=null, oper=null, modos=null;
+    	Linea lin= new Linea(linea,archivoErr,archivoInst);
+    	String eti=null, codop=null, oper=null;
         int cont=0, edo=0, tam=texto.length();
         char[] cad = texto.toCharArray();
         boolean etiq=false, cod=false, op=false;
@@ -338,15 +338,7 @@ import java.io.*;
     }
     	if((etiq && cod) && op)
     	{
-    		modos=buscarCodop(lin);
-    	    if(modos != null)
-    			{
-    				if(eti==null)
-    					eti="NULL";
-    				if(oper==null)
-    					oper="NULL";
-    				escribirInstruccion(linea,"\t"+ eti+"\t"+codop+"\t"+oper+"\t"+modos+"\r\n");
-    			}
+    		buscarCodop(lin);
     	}
     }
 
@@ -362,10 +354,10 @@ import java.io.*;
 	      }
     }
 
-    public void escribirInstruccion(int lin, String instruccion){
+    public void escribirInstruccion(int lin, String instruccion,String archiI){
          String l= Integer.toString(lin);
     	try{
-    		BufferedWriter archinst = new BufferedWriter(new FileWriter(new File(archivoInst), true));
+    		BufferedWriter archinst = new BufferedWriter(new FileWriter(new File(archiI), true));
     		archinst.write(l);
 			archinst.write(instruccion);
 			archinst.close();
@@ -411,48 +403,45 @@ import java.io.*;
 	        	}
     }
 
-    public String buscarCodop(Linea lin){
+    public void buscarCodop(Linea l){
     	boolean bcod=false;
-    	System.out.println(" "+lin.codigo);
+    	if(l.etiqueta==null)
+    			l.etiqueta="NULL";
+    		if(l.operando==null)
+    			l.operando="NULL";
     	 	   	
-    	if(lin.codigo.toUpperCase().equals("ORG") || lin.codigo.toUpperCase().equals("END"))
+    	if(l.codigo.toUpperCase().equals("ORG") || l.codigo.toUpperCase().equals("END"))
     	{
-    		return " ";
+    		bcod=true;
+    		escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\r\n",archivoInst);
     	}
-
     	for(int i=0; i<tabop.size() && !bcod; i++)
     		{
     			Tabop t=new Tabop();
     			t=tabop.elementAt(i);
-				if(lin.codigo.toUpperCase().equals(t.cod))
+				if(l.codigo.toUpperCase().equals(t.cod))
 				{
 					bcod=true;
-						if(t.boper.elementAt(0).equals("1")&& lin.operando==null)
+						if(t.boper.elementAt(0).equals("1")&& l.operando.equals("NULL"))
 						{
 							escribirError(linea+"\tEl codigo de operacion requiere operando\r\n",archivoErr);
-							return null;
 						}
 						else
-							if(t.boper.elementAt(0).equals("0")&& lin.operando!=null)
+							if(t.boper.elementAt(0).equals("0")&& !l.operando.equals("NULL"))
 							{
 								escribirError(linea+"\tEl codigo de operacion no requiere operando\r\n",archivoErr);
-								return null;
 							}
 						else
 						{
-							System.out.println("buscar modo");
-							Modos m=new Modos(lin,t);
-							return m.buscarModo();
+							Modos m=new Modos(l,t);
+							 m.buscarModo();
 						}
 				}
 			}
 	    if(!bcod)
 	    {
-	    	escribirError(linea+ "\tEl codigo de operacion no se encontro en el tabop\r\n",archivoErr);
-	    	return null;
+	    	escribirError(l.lin+ "\tEl codigo de operacion no se encontro en el tabop\r\n",archivoErr);
 	    }
-
-	   return "encontrado";
     }
 
 

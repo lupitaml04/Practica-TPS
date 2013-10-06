@@ -6,13 +6,13 @@ import java.util.regex.Matcher;
 
 
 public class Linea{
-	String etiqueta, codigo, operando, archierr;
+	String etiqueta, codigo, operando, archierr, archiInst;
 	int lin;
-	Ensamblador p=new Ensamblador(); 
-		
-	public Linea(int linea, String archie){
+	Ensamblador p=new Ensamblador();
+	public Linea(int linea, String archie, String archiI){
 		lin=linea;
 		archierr=archie;
+		archiInst=archiI;
 	}
 	
 	public boolean  validarEtiqueta(String eti){
@@ -63,6 +63,10 @@ public class Linea{
 		
 	public boolean validarOperando(String oper){
 		operando=oper;
+		if(operando.indexOf(',') >-1)
+		{
+			return true;	
+		}
 		if(oper.charAt(0)=='#')
 			oper=oper.substring(1);
 			
@@ -83,7 +87,7 @@ public class Linea{
 			if(oper.charAt(0)=='@')
 			{
 				oper=oper.substring(1);
-				Pattern pat = Pattern.compile("[0-8]{1,}");
+				Pattern pat = Pattern.compile("[0-7]{1,}");
 				Matcher mat = pat.matcher(oper);
 				if (mat.matches()) {
 					return true;       	
