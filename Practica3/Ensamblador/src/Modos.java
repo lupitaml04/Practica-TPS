@@ -44,35 +44,35 @@ public class Modos {
 					}
 					if(!encontrado)
 					{
-						e.escribirError(l.lin+"\tFormato de operador no valido para ningun modo de direccionamiento\r\n",l.archierr);
+						e.escribirError(l.lin+"\tFormato de operando no valido para ningun modo de direccionamiento\r\n",l.archierr);
 						encontrado=true;
 					}		
 				}
 				else
-					if(t.modir.elementAt(0).equals("REL8")|| t.modir.elementAt(0).equals("REL16"))
+					if(t.modir.elementAt(0).equals("IMM8")||t.modir.elementAt(0).equals("IMM16"))
 					{
-						encontrado=modoRel(t.modir.elementAt(0));
+						if(l.operando.startsWith("#")){
+							encontrado=modoImm(t.modir.elementAt(0));	
+						}				
 					}
 					else
-						if(t.modir.elementAt(0).equals("INH"))
+						if(l.operando.startsWith("#"))
 						{
-							encontrado=modoInh();
+							e.escribirError(l.lin+"\tEl codop no tiene direccionamiento IMM\r\n",l.archierr);
+							encontrado=true;	
 						}
 						else
-							if(t.modir.elementAt(0).equals("IMM8")||t.modir.elementAt(0).equals("IMM16"))
+							if(t.modir.elementAt(0).equals("REL8")|| t.modir.elementAt(0).equals("REL16"))
 							{
-								if(l.operando.startsWith("#")){
-									encontrado=modoImm(t.modir.elementAt(0));	
-								}				
-							}
-							
-						if(!encontrado)
-						{
-							if(l.operando.startsWith("#"))
-							{
-								e.escribirError(l.lin+"\tEl codop no tiene direccionamiento IMM\r\n",l.archierr);	
+								encontrado=modoRel(t.modir.elementAt(0));
 							}
 							else
+								if(t.modir.elementAt(0).equals("INH"))
+								{
+									encontrado=modoInh();
+								}	
+						if(!encontrado)
+						{
 								for(int i=0;i< t.modir.size() && !encontrado; i++)
 								{
 										if(t.modir.elementAt(i).equals("DIR"))
@@ -100,33 +100,26 @@ public class Modos {
 	public int convertirDecimal(String opera){
 		int num=0;
 		if(opera.startsWith("%")){
-			String n = opera.substring(1);
-            num=complementoADos(n);
+            num=complementoADos(opera.substring(1));
 		}
 		else
 			if(opera.startsWith("$"))
 			{
-				String n = opera.substring(1);
-				num=Integer.parseInt(n,16);
-				if(n.startsWith("0"))
-				num=complementoADos("0"+Integer.toBinaryString(num));
-				else
-				num=complementoADos(Integer.toBinaryString(num));				
+				num=complementoADos(hexBin(opera.substring(1)));				
 			}
 			else
 				if(opera.startsWith("@"))
 				{
-					String n= opera.substring(1);
-					num=Integer.parseInt(n,8);
-					if(n.startsWith("0"))
-						num=complementoADos("0"+Integer.toBinaryString(num));
-						else
-							num=complementoADos(Integer.toBinaryString(num));
+					num=complementoADos(octBin(opera.substring(1)));
 				}
 				else
 				{
-					 num = Integer.parseInt(opera);		
-			    }
+					try{
+						num = Integer.parseInt(opera);
+					}catch(NumberFormatException ex){
+						num=65536;
+					}
+				}
 	return num;
 	}
 
@@ -142,8 +135,15 @@ public class Modos {
 				if(nb.charAt(i)=='0')
 					c2+="1";
 			}
-			num=Integer.parseInt(c2,2);
-			num=(num+1)*(-1);						
+			try{
+				num=Integer.parseInt(c2,2);
+				num=(num+1)*(-1);
+			}
+			catch(NumberFormatException ex){
+						num=65536;
+			}
+			
+									
 		}
 		else
 			num=Integer.parseInt(nb,2);
@@ -283,7 +283,7 @@ public class Modos {
     		}
     		else
     		{
-    			e.escribirError(l.lin+"\tEl formato de operador es invalido para el modo IDX\r\n",l.archierr);
+    			e.escribirError(l.lin+"\tEl formato de operando es invalido para el modo IDX\r\n",l.archierr);
     			return false;
     		}
     	}
@@ -311,13 +311,13 @@ public class Modos {
     						}
     						else
     						{
-    							e.escribirError(l.lin+"\tFormato de operador invalido para modo IDX\r\n",l.archierr);	
+    							e.escribirError(l.lin+"\tFormato de operando invalido para modo IDX\r\n",l.archierr);	
     						}
     						return true;
     					}				
     			}
     			else{
-    				e.escribirError(l.lin+"\tFormato de operador invalido para modo IDX\r\n",l.archierr);
+    				e.escribirError(l.lin+"\tFormato de operando invalido para modo IDX\r\n",l.archierr);
     				return true;
     			}		
     		}	
@@ -346,7 +346,7 @@ public class Modos {
     	} 
     	else
     	{
-    		e.escribirError(l.lin+"\tFormato de operador invalido para IDX1\r\n",l.archierr);
+    		e.escribirError(l.lin+"\tFormato de operando invalido para IDX1\r\n",l.archierr);
     		return true;
     	}
     	return false;
@@ -387,15 +387,18 @@ public class Modos {
     	    			e.escribirInstruccion(l.lin, "\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t[IDX2]\r\n",l.archiInst);	
     	    		}
     	    		else
-    	    		    e.escribirError(l.lin+"\tOperador Invalido para el modo [IDX2]\r\n",l.archierr);
+    	    		    e.escribirError(l.lin+"\tOperando Invalido para el modo [IDX2]\r\n",l.archierr);
     	    	}
     	    	else{
     	    		e.escribirError(l.lin+"\tOperando fuera de rango para el modo [IDX2]\r\n",l.archierr);
     	    	}
     	    }
     	    else{
-    	    	e.escribirError(l.lin+"\tOperador invalido para el modo [IDX2]\r\n",l.archierr);
+    	    	e.escribirError(l.lin+"\tOperando invalido para el modo [IDX2]\r\n",l.archierr);
     	    }   
+    	}
+    	else{
+    		e.escribirError(l.lin+"Formato operando Invalido para modo indexado",l.archierr);
     	}
     	return true;
     }
@@ -413,13 +416,41 @@ public class Modos {
     	    	if(oper2.toUpperCase().equals("X")|| oper2.toUpperCase().equals("Y")|| oper2.toUpperCase().equals("SP")|| oper2.toUpperCase().equals("PC"))
     	    		e.escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t[D,IDX]\r\n",l.archiInst);
     	    		else
-    	    			e.escribirError(l.lin+"\tFormato de operador invalido para [D,IDX]\r\n",l.archierr);
+    	    			e.escribirError(l.lin+"\tFormato de operando invalido para [D,IDX]\r\n",l.archierr);
     	    	
     	        return true;
     	    }	
     	}
+    	else{
+    		e.escribirError(l.lin+"\tFormato de operando invalido para modo indexado\r\n",l.archierr);
+    	return true;
+    	}
     	return false;	
     }
+    
+public static String hexBin(String hex){
+    	String nu,bin="";
+    	for(int i=0;i<hex.length();i++)
+    	{
+    		nu=Integer.toBinaryString(Integer.parseInt(hex.charAt(i)+"",16));
+    		while(nu.length()<4)
+    		nu="0"+nu;
+    		bin+=nu;
+    	}
+    	return bin;
+}
+
+public static String octBin(String oct){
+    	String nu,bin="";
+    	for(int i=0;i<oct.length();i++)
+    	{
+    		nu=Integer.toBinaryString(Integer.parseInt(oct.charAt(i)+"",8));
+    		while(nu.length()<3)
+    		nu="0"+nu;
+    		bin+=nu;
+    	}
+    	return bin;
+}   
 }
 
 
