@@ -62,7 +62,7 @@ public class Modos {
 							encontrado=true;	
 						}
 						else
-							if(t.modir.elementAt(0).equals("REL8")|| t.modir.elementAt(0).equals("REL16"))
+							if(t.modir.elementAt(0).equals("REL8")|| t.modir.elementAt(0).equals("REL9")|| t.modir.elementAt(0).equals("REL16"))
 							{
 								encontrado=modoRel(t.modir.elementAt(0));
 							}
@@ -100,17 +100,39 @@ public class Modos {
 	public int convertirDecimal(String opera){
 		int num=0;
 		if(opera.startsWith("%")){
+			if(opera.charAt(1)=='1')
             num=complementoADos(opera.substring(1));
+            else
+            	try{
+						num = Integer.parseInt(opera);
+					}catch(NumberFormatException ex){
+						num=65536;
+					}
+            	
 		}
 		else
 			if(opera.startsWith("$"))
 			{
-				num=complementoADos(hexBin(opera.substring(1)));				
+				if(opera.charAt(1)=='F')
+				num=complementoADos(hexBin(opera.substring(1)));
+				else
+					try{
+						num = Integer.parseInt(opera.substring(1),16);
+					}catch(NumberFormatException ex){
+						num=65536;
+					}				
 			}
 			else
 				if(opera.startsWith("@"))
 				{
+					if(opera.charAt(1)==7)
 					num=complementoADos(octBin(opera.substring(1)));
+					else
+						try{
+							num = Integer.parseInt(opera.substring(1),8);
+						}catch(NumberFormatException ex){
+							num=65536;
+						}
 				}
 				else
 				{
@@ -120,6 +142,7 @@ public class Modos {
 						num=65536;
 					}
 				}
+    System.out.println(opera+"   "+num);
 	return num;
 	}
 
@@ -141,9 +164,7 @@ public class Modos {
 			}
 			catch(NumberFormatException ex){
 						num=65536;
-			}
-			
-									
+			}								
 		}
 		else
 			num=Integer.parseInt(nb,2);
@@ -257,6 +278,18 @@ public class Modos {
     			}
     			return true;
     		}
+    		if(modo.equals("REL9"))
+    		{
+    			if(oper>=-256 && oper<=255)
+    			{
+    				e.escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+modo+"\r\n",l.archiInst);
+    			}
+    			else
+    			{
+    				e.escribirError(l.lin+"\tEl operando fuera de rango para el modo REL9\r\n",l.archierr);
+    			}
+    			return true;
+    		}
     return false;
     }
     
@@ -273,55 +306,65 @@ public class Modos {
     		operando="0"+operando;
     	oper1=operando.substring(0,operando.indexOf(','));
     	oper2=operando.substring(operando.indexOf(',')+1);
-    	
-    	if(oper1.toUpperCase().equals("A") || oper1.toUpperCase().equals("B") || oper1.toUpperCase().equals("D"))
+    	if(li.validarOperando(oper1))
+    	if(!((oper1.charAt(0)>='a' && oper1.charAt(0)<='z') || (oper1.charAt(0)>='A' && oper1.charAt(0)<='Z')))
     	{
-    		if(oper2.toUpperCase().equals("X") || oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") ||oper2.toUpperCase().equals("PC") )
+    		num=convertirDecimal(oper1);
+    		if(oper2.startsWith("-") || oper2.startsWith("+")||oper2.endsWith("-") || oper2.endsWith("+"))
     		{
-    			e.escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX\r\n",l.archiInst);
+    			if(oper2.startsWith("-") || oper2.startsWith("+"))
+    				oper2=oper2.substring(1);
+    			else
+    				if(oper2.endsWith("-") || oper2.endsWith("+"))
+    					oper2=oper2.substring(0,oper2.length()-1);
+    			if(oper2.toUpperCase().equals("X") || oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP"))
+    			{
+    				if(num>=1 && num<=8){
+    					e.escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX\r\n",l.archiInst);
+    			    }
+    			    else{
+    			    	e.escribirError(l.lin+"\tOperando fuera de rango para el modo IDX\r\n",l.archierr);
+    				}
+    			}
+    			else{
+    				e.escribirError(l.lin+"\tFormato de registro invalido para modo IDX\r\n",l.archierr);
+    				return true;	
+    			}
+    		return true;				
+    		}
+    		else{
+    			 if((oper2.toUpperCase().equals("X") || oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") || oper2.toUpperCase().equals("PC")))
+    			 {
+    			 	if((num>=-16 && num<=15))
+    				e.escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX\r\n",l.archiInst);
+    				else 
+    					return false;	
+    			}
+    			else
+    				e.escribirError(l.lin+"\tFormato de registro invalido para el modo indexado\r\n",l.archierr);
     			return true;
+    		}								
+    	}
+    	else
+    		if(oper1.toUpperCase().equals("A") || oper1.toUpperCase().equals("B") || oper1.toUpperCase().equals("D"))
+    		{
+    			if(oper2.toUpperCase().equals("X") || oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") ||oper2.toUpperCase().equals("PC") )
+    			{
+    				e.escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX\r\n",l.archiInst);
+    				return true;
+    			}
+    			else
+    			{
+    				e.escribirError(l.lin+"\tFormato de registro invalido para el modo IDX\r\n",l.archierr);
+    				return true;
+    			}
     		}
     		else
     		{
-    			e.escribirError(l.lin+"\tEl formato de operando es invalido para el modo IDX\r\n",l.archierr);
-    			return false;
+    			e.escribirError(l.lin+"\tFormato de operador invalido para el modo IDX\r\n",l.archierr);
+    			return true;
     		}
-    	}
-    	else
-    		{
-    			if(li.validarOperando(oper1))
-    			if(!((oper1.charAt(0)>='a' && oper1.charAt(0)<='z') || (oper1.charAt(0)>='A' && oper1.charAt(0)<='Z')))
-    			{
-    				num=convertirDecimal(oper1);
-    				if((num>=-16 && num<=15) && (oper2.toUpperCase().equals("X") || oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") || oper2.toUpperCase().equals("PC")))
-    				{
-    					e.escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX\r\n",l.archiInst);
-    					return true;
-    				}
-    					if(num>=1 && num<=8)
-    					{
-    						if(oper2.startsWith("-") || oper2.startsWith("+"))
-    							oper2=oper2.substring(1);
-    							else
-    								if(oper2.endsWith("-") || oper2.endsWith("+"))
-    									oper2=oper2.substring(0,oper2.length()-1);
-    						if(oper2.toUpperCase().equals("X") || oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP"))
-    						{
-    							e.escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX\r\n",l.archiInst);		
-    						}
-    						else
-    						{
-    							e.escribirError(l.lin+"\tFormato de operando invalido para modo IDX\r\n",l.archierr);	
-    						}
-    						return true;
-    					}				
-    			}
-    			else{
-    				e.escribirError(l.lin+"\tFormato de operando invalido para modo IDX\r\n",l.archierr);
-    				return true;
-    			}		
-    		}	
-    	return false;	
+    	return true;		
     }
     
     public boolean modoIdx1(){
@@ -377,6 +420,11 @@ public class Modos {
   		    oper1=l.operando.substring(1,l.operando.indexOf(','));
     	    oper2=l.operando.substring(l.operando.indexOf(',')+1, l.operando.length()-1);
     	    Linea li=new Linea(l.lin,l.archierr,l.archiInst);
+    	    if(oper1.length()==0 || oper2.length()==0)
+    	    {
+    	    	e.escribirError(l.lin+"\tFormato de operador invalido para el modo indexado\r\n",l.archierr);
+    	    	return true;
+    	    }	
     	    if(li.validarOperando(oper1))
     	    if(!((oper1.charAt(0)>='a' && oper1.charAt(0)<='z') || (oper1.charAt(0)>='A' && oper1.charAt(0)<='Z')))
     	    {

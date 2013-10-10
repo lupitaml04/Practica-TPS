@@ -186,10 +186,11 @@ import java.io.*;
                                 						if(subStr.toUpperCase().equals("END"))
                                 							{
                                 								end=true;
-                                								edo=10;
+                                								edo=6;
                                 								codop=subStr;
                                 								cod=lin.validarCodigo(codop);
                                 								op=true;
+                                								cont+=3;
                                 							}
      	         									}
      	         									if(!end){
@@ -223,10 +224,11 @@ import java.io.*;
                                 						if(subStr.toUpperCase().equals("END"))
                                 							{
                                 								end=true;
-                                								edo=10;
+                                								edo=6;
                                 								codop=subStr;
                                 								cod=lin.validarCodigo(codop);
                                 								op=true;
+                                								cont+=3;
                                 							}
      	         									}
      	         								if(!end){
@@ -410,10 +412,20 @@ import java.io.*;
     		if(l.operando==null)
     			l.operando="NULL";
     	 	   	
-    	if(l.codigo.toUpperCase().equals("ORG") || l.codigo.toUpperCase().equals("END"))
+    	if(l.codigo.toUpperCase().equals("ORG"))
     	{
     		bcod=true;
     		escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\r\n",archivoInst);
+    	}
+    	if(l.codigo.toUpperCase().equals("END"))
+    	{
+    		if(l.operando.equals("NULL")){	
+    			escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\r\n",archivoInst);
+    		}
+    		else{
+    			escribirError(l.lin+"\tEl END no debe tener operando\r\n",archivoErr);
+    		}
+    		bcod=true;
     	}
     	for(int i=0; i<tabop.size() && !bcod; i++)
     		{
