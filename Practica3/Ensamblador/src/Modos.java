@@ -142,7 +142,6 @@ public class Modos {
 						num=65536;
 					}
 				}
-    System.out.println(opera+"   "+num);
 	return num;
 	}
 
@@ -306,6 +305,11 @@ public class Modos {
     		operando="0"+operando;
     	oper1=operando.substring(0,operando.indexOf(','));
     	oper2=operando.substring(operando.indexOf(',')+1);
+    	if(operando.length()<3)
+    	{
+    		e.escribirError(l.lin+"\tFormato de operando invalido para el modo indexado\r\n",l.archierr);
+    		return true;
+    	}
     	if(li.validarOperando(oper1))
     	if(!((oper1.charAt(0)>='a' && oper1.charAt(0)<='z') || (oper1.charAt(0)>='A' && oper1.charAt(0)<='Z')))
     	{
@@ -361,7 +365,7 @@ public class Modos {
     		}
     		else
     		{
-    			e.escribirError(l.lin+"\tFormato de operador invalido para el modo IDX\r\n",l.archierr);
+    			e.escribirError(l.lin+"\tFormato de operando invalido para el modo IDX\r\n",l.archierr);
     			return true;
     		}
     	return true;		
@@ -422,7 +426,7 @@ public class Modos {
     	    Linea li=new Linea(l.lin,l.archierr,l.archiInst);
     	    if(oper1.length()==0 || oper2.length()==0)
     	    {
-    	    	e.escribirError(l.lin+"\tFormato de operador invalido para el modo indexado\r\n",l.archierr);
+    	    	e.escribirError(l.lin+"\tFormato de operando invalido para el modo indexado\r\n",l.archierr);
     	    	return true;
     	    }	
     	    if(li.validarOperando(oper1))
@@ -500,5 +504,3 @@ public static String octBin(String oct){
     	return bin;
 }   
 }
-
-
