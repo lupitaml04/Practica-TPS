@@ -93,13 +93,7 @@ public class Modos {
 			else
 				if(t.modir.elementAt(0).equals("INH")|| t.modir.elementAt(0).equals("IMM")||t.modir.elementAt(0).equals("IDX"))
 				{
-					String cL=Integer.toString(conLoc,16);
-    				while(cL.length()<4)
-    					cL="0"+cL;
-					e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+t.modir.elementAt(0)+"\r\n",l.archiInst);
-					conLoc=conLoc+Integer.parseInt(t.btotal.elementAt(0));
-					if(!l.etiqueta.equals("NULL"))
-					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
+					validarIns();
 					encontrado=true;
 				}
 		if(!encontrado)
@@ -131,9 +125,9 @@ public class Modos {
 				else
 					try{
 						num = Integer.parseInt(opera.substring(1),16);
-					}catch(NumberFormatException ex){
+						}catch(NumberFormatException ex){
 						num=65536;
-					}				
+						}				
 			}
 			else
 				if(opera.startsWith("@"))
@@ -184,10 +178,7 @@ public class Modos {
 	}
 
 	public boolean modoInh(){
-	String cL=conLoc();
-		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tINH\r\n",l.archiInst);
-		if(!l.etiqueta.equals("NULL"))
-			e.escribirSimbolo(l.etiqueta,cL,l.archiT);
+		validarIns();
 		return true;
     }
 
@@ -204,10 +195,7 @@ public class Modos {
     		{
     			if(oper>= -256 && oper<=255)
     			{
-    				String cL=conLoc();
-    				if(!l.etiqueta.equals("NULL"))
-					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    				e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIMM8\r\n",l.archiInst);
+    				validarIns();
     			}
     			else{
     				e.escribirError(l.lin+"\tOperando fuera de rango para el direccionamiento IMM8\r\n",l.archierr);
@@ -216,10 +204,7 @@ public class Modos {
     		else
     		{
     			if(oper>= -32768 && oper<=65535){
-    				String cL=conLoc();
-    				if(!l.etiqueta.equals("NULL"))
-					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    				e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIMM16\r\n",l.archiInst);
+    				validarIns();	
     			}
     			else
     			{
@@ -240,10 +225,7 @@ public class Modos {
     		oper=convertirDecimal(l.operando);
     		if(oper>=0 && oper<=255)
     		{
-    			String cL=conLoc();
-    			if(!l.etiqueta.equals("NULL"))
-					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    			e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tDIR\r\n",l.archiInst);
+    			validarIns();	
     			return true;
     		}
     	}	
@@ -254,19 +236,13 @@ public class Modos {
     {
     	if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z') || (l.operando.charAt(0)>='A' && l.operando.charAt(0)<='Z'))
     	{
-    		String cL=conLoc();
-    		if(!l.etiqueta.equals("NULL"))
-					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tEXT\r\n",l.archiInst);
+    		validarIns();		
     		return true;
     	}
     	oper=convertirDecimal(l.operando);
     	if(oper>=-32768 && oper<= 65535)
     	{
-    		String cL=conLoc();
-    		if(!l.etiqueta.equals("NULL"))
-					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tEXT\r\n",l.archiInst);
+    		validarIns();	
     		return true;
     	}
     	else
@@ -280,10 +256,7 @@ public class Modos {
     {
     	if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z') || (l.operando.charAt(0)>='A' && l.operando.charAt(0)<='Z'))
     	{
-    		String cL=conLoc();
-    		if(!l.etiqueta.equals("NULL"))
-					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+modo+"\r\n",l.archiInst);
+    		validarIns();	
     		return true;
     	}
     	oper=convertirDecimal(l.operando);
@@ -291,10 +264,7 @@ public class Modos {
     		{
     			if(oper>=-128 && oper<=127)
     			{
-    				String cL=conLoc();
-    				if(!l.etiqueta.equals("NULL"))
-    					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    				e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tREL8\r\n",l.archiInst);
+    				validarIns();
     			}
     			else{
     				e.escribirError(l.lin+"\tEl operando fuera de rango para el modo REL8\r\n",l.archierr);
@@ -306,10 +276,7 @@ public class Modos {
     		{
     			if(oper>=-32768 && oper<=65535)
     			{
-    				String cL=conLoc();
-    				if(!l.etiqueta.equals("NULL"))
-    					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    				e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+modo+"\r\n",l.archiInst);
+    				validarIns();	
     			}
     			else
     			{
@@ -321,10 +288,7 @@ public class Modos {
     		{
     			if(oper>=-256 && oper<=255)
     			{
-    				String cL=conLoc();
-    				if(!l.etiqueta.equals("NULL"))
-    					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    				e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+modo+"\r\n",l.archiInst);
+    				validarIns();	
     			}
     			else
     			{
@@ -367,11 +331,8 @@ public class Modos {
     			if(oper2.toUpperCase().equals("X") || oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP"))
     			{
     				if(num>=1 && num<=8){
-    					String cL=conLoc();
-    					if(!l.etiqueta.equals("NULL"))
-    						e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    					e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX\r\n",l.archiInst);
-    			    }
+    					validarIns();  
+    				}
     			    else{
     			    	e.escribirError(l.lin+"\tOperando fuera de rango para el modo IDX\r\n",l.archierr);
     				}
@@ -387,8 +348,7 @@ public class Modos {
     			 {
     			 	if((num>=-16 && num<=15))
     			 	{
-    			 		String cL=conLoc();
-    				e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX\r\n",l.archiInst);
+    			 		validarIns();
     			 	}else 
     					return false;	
     			}
@@ -402,10 +362,7 @@ public class Modos {
     		{
     			if(oper2.toUpperCase().equals("X") || oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") ||oper2.toUpperCase().equals("PC") )
     			{
-    				String cL=conLoc();
-    				if(!l.etiqueta.equals("NULL"))
-    					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    				e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX\r\n",l.archiInst);
+    				validarIns();	
     				return true;
     			}
     			else
@@ -438,10 +395,7 @@ public class Modos {
     		num=convertirDecimal(oper1);
     		if((num>= -256 && num<= 255) && (oper2.toUpperCase().equals("X")|| oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") || oper2.equals("PC")))
     		{
-    			String cL=conLoc();
-    			if(!l.etiqueta.equals("NULL"))
-					e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    			e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX1\r\n",l.archiInst);
+    			validarIns();
     			return true;				
     		}
     	} 
@@ -465,10 +419,7 @@ public class Modos {
     	num=convertirDecimal(oper1);
     	if((num>= 0 && num<= 65535) && (oper2.toUpperCase().equals("X")|| oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") || oper2.equals("PC")))
     	{
-    		String cL=conLoc();
-    		if(!l.etiqueta.equals("NULL"))
-				e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\tIDX2\r\n",l.archiInst);
+    		validarIns();
     		return true;				
     	} 
     	return false;   	
@@ -493,10 +444,7 @@ public class Modos {
     	    	if(num>=0 && num<= 65535)
     	    	{
     	    		if(oper2.toUpperCase().equals("X") || oper2.toUpperCase().equals("Y") ||oper2.toUpperCase().equals("SP") ||oper2.toUpperCase().equals("PC")){ 
-    	    			String cL=conLoc();
-    	    			if(!l.etiqueta.equals("NULL"))
-    	    				e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    	    			e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t[IDX2]\r\n",l.archiInst);	
+    	    			validarIns();	
     	    		}
     	    		else
     	    		    e.escribirError(l.lin+"\tOperando Invalido para el modo [IDX2]\r\n",l.archierr);
@@ -527,10 +475,7 @@ public class Modos {
     	    {
     	    	if(oper2.toUpperCase().equals("X")|| oper2.toUpperCase().equals("Y")|| oper2.toUpperCase().equals("SP")|| oper2.toUpperCase().equals("PC"))
     	    	{
-    	    		String cL=conLoc();
-    	    		if(!l.etiqueta.equals("NULL"))
-    	    			e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    	    		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t[D,IDX]\r\n",l.archiInst);
+    	    		validarIns();	
     	    	}else
     	    			e.escribirError(l.lin+"\tFormato de operando invalido para [D,IDX]\r\n",l.archierr);
     	    	
@@ -566,7 +511,26 @@ public static String octBin(String oct){
     		bin+=nu;
     	}
     	return bin;
-}   
+}  
+
+public void validarIns()
+{
+	String cL=conLoc();
+    if(!l.etiqueta.equals("NULL"))
+    {
+    	if(!e.buscarEti(l.etiqueta,l.archiT))
+    	{
+    		e.escribirSimbolo(l.etiqueta,cL,l.archiT);
+    		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+t.modir.elementAt(i)+"\r\n",l.archiInst);				
+    	}
+    	else
+    		e.escribirError(l.lin+"\tLa etiqueta se repitio\r\n",l.archierr);
+    						
+    }
+	else{
+		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+t.modir.elementAt(i)+"\r\n",l.archiInst);
+	}
+} 
 
 public String conLoc(){
 	String cL=Integer.toString(conLoc,16);

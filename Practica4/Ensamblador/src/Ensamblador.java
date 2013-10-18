@@ -229,12 +229,12 @@ import java.io.*;
      	         case 5:
      	         	if(tam==cont)
      	         		{
-     	         			escribirError(linea+" No hay codigo de operacion\r\n",archivoErr);
+     	         			escribirError(linea+"\tNo hay codigo de operacion\r\n",archivoErr);
      	                	edo=10;
      	         		}else
      	         			if(cad[cont]==';')
      	         				{
-     	         					escribirError(linea+" No hay codigo de operacion \r\n",archivoErr);
+     	         					escribirError(linea+"\tNo hay codigo de operacion \r\n",archivoErr);
      	                    		edo=1;
      	                    		cont++;
      	         				}else
@@ -452,41 +452,7 @@ import java.io.*;
     		if(l.operando==null)
     			l.operando="NULL";
     	 	   	
-    	if(l.codigo.toUpperCase().equals("ORG"))
-    	{
-    		if(eOrg)
-    		{
-    			escribirError(l.lin+"\tSolo debe existir un ORG\r\n",archivoErr);
-    		}
-    		else
-    		{
-    			bcod=true;
-    			if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z' )||(l.operando.charAt(0)>='A'&& l.operando.charAt(0)<='z'))
-    			{
-    				Modos mo=new Modos(l,new Tabop(),conLoc);
-    				conLoc=mo.convertirDecimal(l.operando);
-    				if(conLoc>=0 &&conLoc<=65535)
-    				{
-    					String cL=Integer.toString(conLoc,16);
-    					while(cL.length()<4)
-    						cL="0"+cL;
-    					escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\r\n",archivoInst);
-    				}
-    				else
-    					escribirError(l.lin+"\nOperando de ORG fuera de rango\r\t",archivoErr);	
-    			}
-    		}
-    	}
-    	if(l.codigo.toUpperCase().equals("END"))
-    	{
-    		if(l.operando.equals("NULL")){	
-    			escribirInstruccion(l.lin,"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\r\n",archivoInst);
-    		}
-    		else{
-    			escribirError(l.lin+"\tEl END no debe tener operando\r\n",archivoErr);
-    		}
-    		bcod=true;
-    	}
+    
     	bcod=directivas(l);
     	for(int i=0; i<tabop.size() && !bcod; i++)
     		{
@@ -521,63 +487,129 @@ import java.io.*;
 	boolean encon=false, dirC=false;
 	int j,op=0,inC=0;
 	Modos d=new Modos(l,new Tabop(),conLoc);
-	for(j=0;j<dir.size()&&!encon;j++)
-	{
-		if(l.codigo.toUpperCase().equals(dir.elementAt(j)))
-		{
-			System.out.println(j+"\t"+dir.elementAt(j));
-			encon=true;
-		}
-	}
-	if(!encon)
-		return false;
-	j--;
-	if((l.operando.charAt(0)>='a'&&l.operando.charAt(0)<='z')||(l.operando.charAt(0)>='A'&&l.operando.charAt(0)<='Z'))
-	{
-		escribirError(l.lin+"\tLa directiva no acepta etiquetas\r\n",l.archierr);
-		return true;
-	}
-	else
-	op=d.convertirDecimal(l.operando);
-	if(j>=0&&j<=2)
-	{
-		if(op>=0 && op<=255)
-		{
-			dirC=true;
-			inC=1;
-		}
-	}
-	else
-		if(j>=3 &&j<=5)
-		{
-			if(op>=0 && op<=65535)
-			{
-				dirC=true;
-				inC=2;
-			}
-		}
-		else
-			if(j==6)
-			{
-				dirC=true;
-			}
-			else
-				if(j>=7 && j<=9)
-				{
-					if(op>=0 && op<=65535)
-					{
-						dirC=true;
-						inC=op;
-					}
-				}
-				if(j==10 || j==11)
-				{
-					if(op>=0 && op<=65535)
-					{
-						dirC=true;
-						inC=op*2;
-					}
-				}			
+	
+		if(l.codigo.toUpperCase().equals("ORG"))
+    	{
+    		if(eOrg)
+    		{
+    			escribirError(l.lin+"\tSolo debe existir un ORG\r\n",archivoErr);
+    		}
+    		else
+    		{
+    			if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z' )||(l.operando.charAt(0)>='A'&& l.operando.charAt(0)<='z'))
+    			{
+    				Modos mo=new Modos(l,new Tabop(),conLoc);
+    				conLoc=mo.convertirDecimal(l.operando);
+    				if(conLoc>=0 &&conLoc<=65535)
+    				{
+    					encon=true;
+    				}
+    				else{
+    						escribirError(l.lin+"\nOperando de ORG fuera de rango\r\t",archivoErr);	
+    						return true;
+    				}
+    			}
+    		}
+    	}
+    	else
+    		if(l.codigo.toUpperCase().equals("END"))
+    		{
+    			encon=true;
+    			if(l.operando.equals("NULL")){
+    				dirC=true;
+    			}
+    			else{
+    				escribirError(l.lin+"\tEl END no debe tener operando\r\n",archivoErr);
+    				return true;
+    			}
+    		}
+    		else
+    			if(l.codigo.toUpperCase().equals("EQU"))
+    			{
+    				if(l.etiqueta.equals("NULL"))
+    				{
+    					escribirError(l.lin+"\tLa directiva EQU debe tener etiqueta\r\n",archivoErr);
+    					return true;
+    				}
+    				else
+    					{
+    						if(l.operando.equals("NULL"))
+    						{
+    							escribirError(l.lin+"\tLa directiva EQU debe tener operando\r\n",archivoErr);
+    							return true;
+    						}
+    						else{
+    							op=d.convertirDecimal(l.operando);
+    							if(op>=0 && op<=65535)
+    							{
+    								String cL= Integer.toString(op,16);
+    								while(cL.length()<4)
+    									cL="0"+cL;
+    								escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\r\n",l.archiInst);
+    								escribirSimbolo(l.etiqueta,cL,l.archiT);
+    							}
+    						}
+    				}	
+    			}
+    			else
+    			{
+    				for(j=0;j<dir.size()&&!encon;j++)
+    				{
+    					if(l.codigo.toUpperCase().equals(dir.elementAt(j)))
+    					{
+    						System.out.println(j+"\t"+dir.elementAt(j));
+    						encon=true;
+    					}
+    				}
+    				if(!encon)
+    					return false;
+    				j--;
+    				if((l.operando.charAt(0)>='a'&&l.operando.charAt(0)<='z')||(l.operando.charAt(0)>='A'&&l.operando.charAt(0)<='Z'))
+    				{
+    					escribirError(l.lin+"\tLas directivas no aceptan etiquetas\r\n",l.archierr);
+    					return true;
+    				}
+    				op=d.convertirDecimal(l.operando);
+    				if(j>=0&&j<=2)
+    				{
+    					if(op>=0 && op<=255)
+    					{
+    						dirC=true;
+    						inC=1;
+    					}
+    				}
+    				else
+    					if(j>=3 &&j<=5)
+    					{
+    						if(op>=0 && op<=65535)
+    						{
+    							dirC=true;
+    							inC=2;
+    						}
+    					}
+    					else
+    						if(j==6)
+    						{
+    							dirC=true;
+    						}
+    						else
+    							if(j>=7 && j<=9)
+    							{
+    								if(op>=0 && op<=65535)
+    								{
+    									dirC=true;
+    									inC=op;
+    								}
+    							}
+    							if(j==10 || j==11)
+    							{
+    								if(op>=0 && op<=65535)
+    								{
+    									dirC=true;
+    									inC=op*2;
+    								}
+    							}
+    			}
 	if(dirC)
 	{
 		String cL= Integer.toString(conLoc,16);
@@ -589,6 +621,28 @@ import java.io.*;
 		conLoc+=inC;
 	}
 	return true;		
+}
+
+public boolean buscarEti(String eti,String archiT)
+{
+	boolean encon=false;
+	try{
+	
+	RandomAccessFile archi=new RandomAccessFile(new File(archiT),"r");
+	while(archi.getFilePointer()!=archi.length() && !encon)
+	{
+		String l=archi.readLine();
+		StringTokenizer st = new StringTokenizer(l,"\t");
+		String etiq=st.nextToken();
+		if(etiq.equals(eti))
+			encon=true;		
+	}
+	}
+	catch(IOException e)
+	{
+		System.out.println("Error al abrir archivo TDS");
+	}
+	return encon;
 }
     public static void main(String[] args){
     	Scanner Leer=new Scanner(System.in);
