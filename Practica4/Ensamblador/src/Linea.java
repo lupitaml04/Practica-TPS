@@ -6,13 +6,14 @@ import java.util.regex.Matcher;
 
 
 public class Linea{
-	String etiqueta, codigo, operando, archierr, archiInst;
+	String etiqueta, codigo, operando, archierr, archiInst, archiT;
 	int lin;
 	Ensamblador p=new Ensamblador();
-	public Linea(int linea, String archie, String archiI){
+	public Linea(int linea, String archie, String archiI,String archiT){
 		lin=linea;
 		archierr=archie;
 		archiInst=archiI;
+		this.archiT=archiT;
 	}
 	
 	public boolean  validarEtiqueta(String eti){

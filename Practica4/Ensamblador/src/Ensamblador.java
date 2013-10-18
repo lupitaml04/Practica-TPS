@@ -11,14 +11,27 @@ import java.util.*;
 import java.io.*;
 
  class Ensamblador {
-	String ruta, texto, archivo,archivoInst,archivoErr;
+	String ruta, texto, archivo,archivoInst,archivoErr,archivoT;
 	Vector<Tabop> tabop=new Vector<Tabop>();
 	int linea =0;
 	int conLoc=0;
 	boolean end,eOrg=false;
+	Vector dir= new Vector();
 
 	public Ensamblador(String r){
 		ruta=r;
+		dir.add("DB");
+		dir.add("DC.B");
+		dir.add("FCB");
+		dir.add("DW");
+		dir.add("DC.W");
+		dir.add("FDB");
+		dir.add("FCC");
+		dir.add("DS");
+		dir.add("DS.B");
+		dir.add("RMB");
+		dir.add("DS.W");
+		dir.add("RMW");
 	}
 
 	public Ensamblador(){
@@ -45,12 +58,16 @@ import java.io.*;
 	public void crearArchivos(){
 		archivoInst=ruta.substring(0,ruta.indexOf('.'))+".INST";
 		archivoErr=ruta.substring(0,ruta.indexOf('.'))+".ERR";
+		archivoT=ruta.substring(0,ruta.indexOf('.'))+".TDS";
 		File inst = new File(archivoInst);
 		File err = new File(archivoErr);
+		File tds =new File(archivoT);
 		 if(inst.exists())
 		 	inst.delete();
 		 if(err.exists())
 		 	err.delete();
+		 if(tds.exists())
+		 	tds.delete();
 		try{
 			BufferedWriter archinst = new BufferedWriter(new FileWriter(new File(archivoInst), true));
 			archinst.write("LINEA\tCONTLOC\tETQ\tCODOP\tOPER\tMODOS");
@@ -58,7 +75,7 @@ import java.io.*;
 			archinst.close();
 		}
 	    catch(IOException e){
-					System.out.println("Error");
+					System.out.println("Error al crear archivo de instrucciones");
 	    	}
 	    try{
 	    	BufferedWriter archierr = new BufferedWriter(new FileWriter(new File(archivoErr), true));
@@ -66,7 +83,15 @@ import java.io.*;
 			archierr.close();
 		}
 	    catch(IOException e2){
-		   	System.out.println("Error");
+		   	System.out.println("Error al crear archivo de errores");
+	    }
+	    try{
+	    	BufferedWriter archiT = new BufferedWriter(new FileWriter(new File(archivoT), true));
+			archiT.write("ETIQUETA\tVALOR\r\n............................................\r\n");
+			archiT.close();
+		}
+	    catch(IOException e3){
+		   	System.out.println("Error al crear archivo de tabla de simbolos");
 	    }
 	}
 
@@ -91,7 +116,7 @@ import java.io.*;
 	}
 
     public void revisarLinea(){
-    	Linea lin= new Linea(linea,archivoErr,archivoInst);
+    	Linea lin= new Linea(linea,archivoErr,archivoInst,archivoT);
     	String eti=null, codop=null, oper=null;
         int cont=0, edo=0, tam=texto.length();
         char[] cad = texto.toCharArray();
@@ -369,6 +394,21 @@ import java.io.*;
 		    System.out.println("Error");
 	       }
     }
+    
+    public void escribirSimbolo(String eti,String valor, String archi){
+    	archivoT=archi;
+    	try{
+    		BufferedWriter archiT = new BufferedWriter(new FileWriter(new File(archivoT), true));
+			archiT.write(eti);
+			archiT.write("\t\t");
+			archiT.write(valor);
+			archiT.write("\r\n");
+			archiT.close();
+		}
+	      catch(IOException e){
+		    System.out.println("Error");
+	      }
+    }
 
     public void leerTabop(){
     	String l,rt, cod,codant=null;
@@ -395,8 +435,7 @@ import java.io.*;
 						t.agregar(cod,st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken(),st.nextToken());
 						tabop.addElement(t);
 						codant=cod;
-					}
-					
+					}	
 		   		}
 		    	archi.close();
 		    }
@@ -448,8 +487,7 @@ import java.io.*;
     		}
     		bcod=true;
     	}
-    	Modos d=new Modos(l,new Tabop(),conLoc);
-    	d.directivas();
+    	bcod=directivas(l);
     	for(int i=0; i<tabop.size() && !bcod; i++)
     		{
     			Tabop t=new Tabop();
@@ -478,8 +516,80 @@ import java.io.*;
 	    	escribirError(l.lin+ "\tEl codigo de operacion no se encontro en el tabop\r\n",archivoErr);
 	    }
     }
-
-
+    
+    public boolean directivas(Linea l){
+	boolean encon=false, dirC=false;
+	int j,op=0,inC=0;
+	Modos d=new Modos(l,new Tabop(),conLoc);
+	for(j=0;j<dir.size()&&!encon;j++)
+	{
+		if(l.codigo.toUpperCase().equals(dir.elementAt(j)))
+		{
+			System.out.println(j+"\t"+dir.elementAt(j));
+			encon=true;
+		}
+	}
+	if(!encon)
+		return false;
+	j--;
+	if((l.operando.charAt(0)>='a'&&l.operando.charAt(0)<='z')||(l.operando.charAt(0)>='A'&&l.operando.charAt(0)<='Z'))
+	{
+		escribirError(l.lin+"\tLa directiva no acepta etiquetas\r\n",l.archierr);
+		return true;
+	}
+	else
+	op=d.convertirDecimal(l.operando);
+	if(j>=0&&j<=2)
+	{
+		if(op>=0 && op<=255)
+		{
+			dirC=true;
+			inC=1;
+		}
+	}
+	else
+		if(j>=3 &&j<=5)
+		{
+			if(op>=0 && op<=65535)
+			{
+				dirC=true;
+				inC=2;
+			}
+		}
+		else
+			if(j==6)
+			{
+				dirC=true;
+			}
+			else
+				if(j>=7 && j<=9)
+				{
+					if(op>=0 && op<=65535)
+					{
+						dirC=true;
+						inC=op;
+					}
+				}
+				if(j==10 || j==11)
+				{
+					if(op>=0 && op<=65535)
+					{
+						dirC=true;
+						inC=op*2;
+					}
+				}			
+	if(dirC)
+	{
+		String cL= Integer.toString(conLoc,16);
+		while(cL.length()<4)
+			cL="0"+cL;
+		escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\r\n",l.archiInst);
+		if(!l.etiqueta.equals("NULL"))
+			escribirSimbolo(l.etiqueta,cL,l.archiT);
+		conLoc+=inC;
+	}
+	return true;		
+}
     public static void main(String[] args){
     	Scanner Leer=new Scanner(System.in);
     	String ruta="";
