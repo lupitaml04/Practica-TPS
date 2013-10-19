@@ -70,7 +70,7 @@ import java.io.*;
 		 	tds.delete();
 		try{
 			BufferedWriter archinst = new BufferedWriter(new FileWriter(new File(archivoInst), true));
-			archinst.write("LINEA\tCONTLOC\tETQ\tCODOP\tOPER\tMODOS");
+			archinst.write("LINEA\t\tCONTLOC\t\tETQ\t\tCODOP\t\tOPER\t\tMODOS");
 			archinst.write("\r\n...........................................................\r\n");
 			archinst.close();
 		}
@@ -308,8 +308,33 @@ import java.io.*;
      	         						}else
      	         							{
      	         								oper=cad[cont]+"";
-     	         								cont++;
-     	         								edo=8;
+     	         								if(cad[cont]=='\"')
+     	         								{
+     	         									boolean fc=false;
+     	         									int c=0;
+     	         									c=cont;
+     	         									while(!fc)
+     	         									{
+     	         										c=texto.indexOf("\"",c+1);
+     	         										if(texto.charAt(c-1)!='\\'){
+     	         											fc=true;
+     	         											lin.opera(texto.substring(cont,c+1));
+     	         											cont+=texto.substring(cont,c+1).length();
+     	         											edo=9;
+     	         											op=true;
+     	         										}			
+     	         									}
+     	         									if(!fc)
+     	         									{
+     	         										op=false;
+     	         										escribirError(linea+"\tOperando invalido\r\n",archivoErr);
+     	         										edo=10;
+     	         									}		
+     	         								}
+     	         								else{
+     	         									cont++;
+     	         									edo=8;
+     	         								}
      	         							}
      	         break;
      	         case 8:
@@ -487,22 +512,27 @@ import java.io.*;
 	boolean encon=false, dirC=false;
 	int j,op=0,inC=0;
 	Modos d=new Modos(l,new Tabop(),conLoc);
-	
+	if(l.operando.startsWith("\"") && !l.codigo.toUpperCase().equals("FCC"))
+    {
+    	escribirError(l.lin+"\tFormato de operando invalido\r\n",l.archierr);
+    	return true;
+    }
 		if(l.codigo.toUpperCase().equals("ORG"))
     	{
+    		encon=true;
     		if(eOrg)
     		{
     			escribirError(l.lin+"\tSolo debe existir un ORG\r\n",archivoErr);
     		}
     		else
     		{
-    			if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z' )||(l.operando.charAt(0)>='A'&& l.operando.charAt(0)<='z'))
+    			if(!(l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z' )||!(l.operando.charAt(0)>='A'&& l.operando.charAt(0)<='z'))
     			{
     				Modos mo=new Modos(l,new Tabop(),conLoc);
     				conLoc=mo.convertirDecimal(l.operando);
     				if(conLoc>=0 &&conLoc<=65535)
     				{
-    					encon=true;
+    					dirC=true;
     				}
     				else{
     						escribirError(l.lin+"\nOperando de ORG fuera de rango\r\t",archivoErr);	
@@ -545,30 +575,53 @@ import java.io.*;
     								String cL= Integer.toString(op,16);
     								while(cL.length()<4)
     									cL="0"+cL;
-    								escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\r\n",l.archiInst);
-    								escribirSimbolo(l.etiqueta,cL,l.archiT);
+    								if(!l.etiqueta.equals("NULL"))
+    								{
+    									if(!buscarEti(l.etiqueta,l.archiT))
+    									{
+    										escribirSimbolo(l.etiqueta,cL,l.archiT);
+    										escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\r\n",l.archiInst);				
+    									}
+    									else
+    										escribirError(l.lin+"\tLa etiqueta se repitio\r\n",l.archierr);				
+    								}
+    								else{
+    									escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\r\n",l.archiInst);
+    								}
+    							}
     							}
     						}
     				}	
-    			}
     			else
     			{
+    				
+    				
     				for(j=0;j<dir.size()&&!encon;j++)
     				{
     					if(l.codigo.toUpperCase().equals(dir.elementAt(j)))
     					{
-    						System.out.println(j+"\t"+dir.elementAt(j));
     						encon=true;
     					}
     				}
-    				if(!encon)
-    					return false;
-    				j--;
+    				if(encon)
+    				{
+    					if(l.operando.equals("NULL"))
+    				{
+    					escribirError(l.lin+"\tLas directivas deben tener operando\r\n",l.archierr);
+    					return true;
+    				}
+    				else
     				if((l.operando.charAt(0)>='a'&&l.operando.charAt(0)<='z')||(l.operando.charAt(0)>='A'&&l.operando.charAt(0)<='Z'))
     				{
     					escribirError(l.lin+"\tLas directivas no aceptan etiquetas\r\n",l.archierr);
     					return true;
     				}
+    				}
+    				if(!encon)
+    					return false;
+    				j--;
+    				
+    				if(!l.operando.startsWith("\""))
     				op=d.convertirDecimal(l.operando);
     				if(j>=0&&j<=2)
     				{
@@ -590,7 +643,28 @@ import java.io.*;
     					else
     						if(j==6)
     						{
+    							int c=0,tam=l.operando.length()-2;
+    							System.out.println(tam+"\t"+l.operando.length());
+    							char ca;
+    						    while(c!=l.operando.length())
+    							{
+    								c=l.operando.indexOf("\\",c+1);
+    								if(c<0)
+    									c=l.operando.length();
+    								else
+    								{
+    									ca=l.operando.charAt(c+1);
+    									if(ca=='\"'|| ca=='a'|| ca=='n' || ca=='t' || ca=='s'|| ca=='r'|| ca=='b'ca=='\\')
+    									{
+    										c++;
+    										tam--;	
+    									}
+    										
+    									System.out.println(tam);
+    								}
+    							}
     							dirC=true;
+    							inC=tam;
     						}
     						else
     							if(j>=7 && j<=9)
@@ -613,12 +687,23 @@ import java.io.*;
 	if(dirC)
 	{
 		String cL= Integer.toString(conLoc,16);
-		while(cL.length()<4)
-			cL="0"+cL;
-		escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\r\n",l.archiInst);
-		if(!l.etiqueta.equals("NULL"))
-			escribirSimbolo(l.etiqueta,cL,l.archiT);
-		conLoc+=inC;
+    	while(cL.length()<4)
+    		cL="0"+cL;
+    	if(!l.etiqueta.equals("NULL"))
+    	{
+    		if(!buscarEti(l.etiqueta,l.archiT))
+    		{
+    			escribirSimbolo(l.etiqueta,cL,l.archiT);
+    			escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\r\n",l.archiInst);				
+    			conLoc+=inC;    		
+    		}
+    		else
+    		escribirError(l.lin+"\tLa etiqueta se repitio\r\n",l.archierr);				
+    	}
+    	else{
+    		escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\r\n",l.archiInst);
+    		conLoc+=inC;    	
+    	}
 	}
 	return true;		
 }
@@ -627,15 +712,14 @@ public boolean buscarEti(String eti,String archiT)
 {
 	boolean encon=false;
 	try{
-	
-	RandomAccessFile archi=new RandomAccessFile(new File(archiT),"r");
-	while(archi.getFilePointer()!=archi.length() && !encon)
-	{
-		String l=archi.readLine();
-		StringTokenizer st = new StringTokenizer(l,"\t");
-		String etiq=st.nextToken();
-		if(etiq.equals(eti))
-			encon=true;		
+		RandomAccessFile archi=new RandomAccessFile(new File(archiT),"r");
+		while(archi.getFilePointer()!=archi.length() && !encon)
+		{
+			String l=archi.readLine();
+			StringTokenizer st = new StringTokenizer(l,"\t");
+			String etiq=st.nextToken();
+			if(etiq.equals(eti))
+				encon=true;		
 	}
 	}
 	catch(IOException e)

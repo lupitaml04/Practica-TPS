@@ -236,7 +236,10 @@ public class Modos {
     {
     	if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z') || (l.operando.charAt(0)>='A' && l.operando.charAt(0)<='Z'))
     	{
-    		validarIns();		
+    		if(e.buscarEti(l.operando,l.archiT))
+    		validarIns();
+    		else
+    			e.escribirError(l.lin+"\tLa etiqueta no existe\r\n",l.archierr);		
     		return true;
     	}
     	oper=convertirDecimal(l.operando);
@@ -256,7 +259,10 @@ public class Modos {
     {
     	if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z') || (l.operando.charAt(0)>='A' && l.operando.charAt(0)<='Z'))
     	{
-    		validarIns();	
+    		if(e.buscarEti(l.operando,l.archiT))
+    		validarIns();
+    		else
+    			e.escribirError(l.lin+"\tLa etiqueta no existe\r\n",l.archierr);		
     		return true;
     	}
     	oper=convertirDecimal(l.operando);
@@ -521,14 +527,14 @@ public void validarIns()
     	if(!e.buscarEti(l.etiqueta,l.archiT))
     	{
     		e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+t.modir.elementAt(i)+"\r\n",l.archiInst);				
+    		e.escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\t\t"+t.modir.elementAt(i)+"\r\n",l.archiInst);				
     	}
     	else
     		e.escribirError(l.lin+"\tLa etiqueta se repitio\r\n",l.archierr);
     						
     }
 	else{
-		e.escribirInstruccion(l.lin,"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+t.modir.elementAt(i)+"\r\n",l.archiInst);
+		e.escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\t\t"+t.modir.elementAt(i)+"\r\n",l.archiInst);
 	}
 } 
 
@@ -537,7 +543,6 @@ public String conLoc(){
     while(cL.length()<4)
     cL="0"+cL;
     conLoc=conLoc+Integer.parseInt(t.btotal.elementAt(i));
-    //System.out.println(i+"\t"+t.cod+"\t"+t.modir.elementAt(i)+"\t"+t.btotal.elementAt(i));
     return cL;
 } 
 }

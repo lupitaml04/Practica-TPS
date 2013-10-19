@@ -62,6 +62,11 @@ public class Linea{
 			}	
 		}
 		
+	public void opera(String op)
+	{
+		operando=op;
+	}	
+		
 	public boolean validarOperando(String oper){
 		operando=oper;
 		if(operando.indexOf(',') >-1)
