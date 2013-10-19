@@ -91,7 +91,7 @@ public class Modos {
 					}								
 			}
 			else
-				if(t.modir.elementAt(0).equals("INH")|| t.modir.elementAt(0).equals("IMM")||t.modir.elementAt(0).equals("IDX"))
+				if(t.modir.elementAt(i).equals("INH")|| t.modir.elementAt(i).equals("IMM")||t.modir.elementAt(i).equals("IDX"))
 				{
 					validarIns();
 					encontrado=true;
@@ -113,9 +113,7 @@ public class Modos {
 					}catch(NumberFormatException ex){
 						num=65536;
 					}
-            }
-            	
-            	
+            }     	
 		}
 		else
 			if(opera.startsWith("$"))
@@ -135,6 +133,44 @@ public class Modos {
 					if(opera.charAt(1)==7)
 					num=complementoADos(octBin(opera.substring(1)));
 					else
+						try{
+							num = Integer.parseInt(opera.substring(1),8);
+						}catch(NumberFormatException ex){
+							num=65536;
+						}
+				}
+				else
+				{
+					try{
+						num = Integer.parseInt(opera);
+					}catch(NumberFormatException ex){
+						num=65536;
+					}
+				}
+	return num;
+	}
+	
+		public int convertirDecimal2(String opera){
+		int num=0;
+		if(opera.startsWith("%")){
+            	try{
+						num = Integer.parseInt(opera.substring(1),2);
+					}catch(NumberFormatException ex){
+						num=65536;
+					}     	
+		}
+		else
+			if(opera.startsWith("$"))
+			{
+					try{
+						num = Integer.parseInt(opera.substring(1),16);
+						}catch(NumberFormatException ex){
+						num=65536;
+						}				
+			}
+			else
+				if(opera.startsWith("@"))
+				{
 						try{
 							num = Integer.parseInt(opera.substring(1),8);
 						}catch(NumberFormatException ex){

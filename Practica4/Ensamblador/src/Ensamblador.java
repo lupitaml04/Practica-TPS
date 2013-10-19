@@ -15,7 +15,7 @@ import java.io.*;
 	Vector<Tabop> tabop=new Vector<Tabop>();
 	int linea =0;
 	int conLoc=0;
-	boolean end,eOrg=false;
+	boolean end,eOrg=false, dir_ini=false;
 	Vector dir= new Vector();
 
 	public Ensamblador(String r){
@@ -174,7 +174,7 @@ import java.io.*;
      	         		}else
      	         			if(cad[cont]==';')
      	         				{
-     	         					escribirError(linea+"	Linea incorrecta\r\n",archivoErr);
+     	         					escribirError(linea+"\tLinea incorrecta\r\n",archivoErr);
      	         					edo=1;
      	         					cont++;
      	         				}else
@@ -310,26 +310,32 @@ import java.io.*;
      	         								oper=cad[cont]+"";
      	         								if(cad[cont]=='\"')
      	         								{
-     	         									boolean fc=false;
-     	         									int c=0;
-     	         									c=cont;
-     	         									while(!fc)
+     	         									boolean fc=false, com=false;
+     	         									int c=cont;
+     	         									while(!fc && c<texto.length())
      	         									{
      	         										c=texto.indexOf("\"",c+1);
-     	         										if(texto.charAt(c-1)!='\\'){
+     	         										System.out.println(c);
+     	         										if(c<0)
+     	         											c=texto.length();
+     	         											else
+     	         					
+     	         											if(texto.charAt(c-1)!='\\'){
      	         											fc=true;
      	         											lin.opera(texto.substring(cont,c+1));
+     	         											System.out.println(texto.substring(cont,c+1));
      	         											cont+=texto.substring(cont,c+1).length();
      	         											edo=9;
      	         											op=true;
-     	         										}			
-     	         									}
-     	         									if(!fc)
+     	         										}					
+     	         								}
+     	         								if(!fc)
      	         									{
      	         										op=false;
      	         										escribirError(linea+"\tOperando invalido\r\n",archivoErr);
      	         										edo=10;
      	         									}		
+     	         											
      	         								}
      	         								else{
      	         									cont++;
@@ -498,7 +504,22 @@ import java.io.*;
 						else
 						{
 							Modos m=new Modos(l,t,conLoc);
-							 conLoc=m.buscarModo();
+							
+							 int conLoca=m.buscarModo();
+							 if(!dir_ini)
+							 {
+							 	if(conLoca>conLoc)
+							 	{
+							 		dir_ini=true;
+							 		escribirError(linea+"\tFalto especificar la direccion inicial con un org\r\n",archivoErr);	
+							 	}
+							 }
+							 conLoc=conLoca;
+							 if(conLoc>65535)
+							 {
+							 	escribirError(l.lin+"\tEl CONLOC  sobrepaso su rango\r\n",archivoErr);
+							 conLoc=0;
+							 }
 						}
 				}
 			}
@@ -529,16 +550,22 @@ import java.io.*;
     			if(!(l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z' )||!(l.operando.charAt(0)>='A'&& l.operando.charAt(0)<='z'))
     			{
     				Modos mo=new Modos(l,new Tabop(),conLoc);
-    				conLoc=mo.convertirDecimal(l.operando);
+    				conLoc=mo.convertirDecimal2(l.operando);
     				if(conLoc>=0 &&conLoc<=65535)
     				{
     					dirC=true;
+    					dir_ini=true;
+    					eOrg=true;
     				}
     				else{
     						escribirError(l.lin+"\nOperando de ORG fuera de rango\r\t",archivoErr);	
     						return true;
     				}
     			}
+    			else{
+    				escribirError(l.lin+"\tLa directiva org no debe tener etiqueta como operando\r\n",archivoErr);
+    			}
+    			
     		}
     	}
     	else
@@ -569,7 +596,7 @@ import java.io.*;
     							return true;
     						}
     						else{
-    							op=d.convertirDecimal(l.operando);
+    							op=d.convertirDecimal2(l.operando);
     							if(op>=0 && op<=65535)
     							{
     								String cL= Integer.toString(op,16);
@@ -603,85 +630,90 @@ import java.io.*;
     						encon=true;
     					}
     				}
-    				if(encon)
-    				{
-    					if(l.operando.equals("NULL"))
-    				{
-    					escribirError(l.lin+"\tLas directivas deben tener operando\r\n",l.archierr);
-    					return true;
-    				}
-    				else
-    				if((l.operando.charAt(0)>='a'&&l.operando.charAt(0)<='z')||(l.operando.charAt(0)>='A'&&l.operando.charAt(0)<='Z'))
-    				{
-    					escribirError(l.lin+"\tLas directivas no aceptan etiquetas\r\n",l.archierr);
-    					return true;
-    				}
-    				}
     				if(!encon)
     					return false;
     				j--;
-    				
-    				if(!l.operando.startsWith("\""))
-    				op=d.convertirDecimal(l.operando);
     				if(j>=0&&j<=2)
     				{
-    					if(op>=0 && op<=255)
-    					{
-    						dirC=true;
-    						inC=1;
-    					}
+    					if(noNULL(l.operando,l.codigo))
+    						if(noEti(l.operando,l.codigo))
+    						{
+    							op=d.convertirDecimal2(l.operando);
+    							if(op>=0 && op<=255)
+    							{
+    								dirC=true;
+    								inC=1;
+    							}
+    						}
     				}
     				else
     					if(j>=3 &&j<=5)
     					{
-    						if(op>=0 && op<=65535)
-    						{
-    							dirC=true;
-    							inC=2;
-    						}
+    						if(noNULL(l.operando,l.codigo))
+    							if(noEti(l.operando,l.codigo))
+    							{
+    								op=d.convertirDecimal2(l.operando);
+    								if(op>=0 && op<=65535)
+    								{
+    									dirC=true;
+    									inC=2;
+    								}
+    							}
     					}
     					else
     						if(j==6)
     						{
-    							int c=0,tam=l.operando.length()-2;
-    							System.out.println(tam+"\t"+l.operando.length());
-    							char ca;
-    						    while(c!=l.operando.length())
-    							{
-    								c=l.operando.indexOf("\\",c+1);
-    								if(c<0)
-    									c=l.operando.length();
-    								else
+    							if(noNULL(l.operando,l.codigo))
+    								if(noEti(l.operando,l.codigo))
     								{
-    									ca=l.operando.charAt(c+1);
-    									if(ca=='\"'|| ca=='a'|| ca=='n' || ca=='t' || ca=='s'|| ca=='r'|| ca=='b'ca=='\\')
+    									int c=0,tam=l.operando.length()-2;
+    									System.out.println(tam+"\t"+l.operando.length());
+    									char ca;
+    									while(c!=l.operando.length())
     									{
-    										c++;
-    										tam--;	
-    									}
-    										
-    									System.out.println(tam);
-    								}
-    							}
-    							dirC=true;
-    							inC=tam;
+    										c=l.operando.indexOf("\\",c+1);
+    										if(c<0)
+    											c=l.operando.length();
+    											else
+    												{
+    													ca=l.operando.charAt(c+1);
+    													if(ca=='\"'|| ca=='a'|| ca=='n' || ca=='t' || ca=='s'|| ca=='r'|| ca=='b'||ca=='\\')
+    													{
+    														c++;
+    														tam--;	
+    													}System.out.println(tam);
+    												}
+    										}
+    										dirC=true;
+    										inC=tam;	
+    								}	
     						}
     						else
     							if(j>=7 && j<=9)
     							{
-    								if(op>=0 && op<=65535)
-    								{
-    									dirC=true;
-    									inC=op;
-    								}
+    								if(noNULL(l.operando,l.codigo))
+    									if(noEti(l.operando,l.codigo))
+    									{
+    										op=d.convertirDecimal2(l.operando);
+    										if(op>=0 && op<=65535)
+    										{
+    											dirC=true;
+    											inC=op;
+    										}
+    									}
     							}
     							if(j==10 || j==11)
     							{
-    								if(op>=0 && op<=65535)
-    								{
-    									dirC=true;
-    									inC=op*2;
-    								}
+    								if(noNULL(l.operando,l.codigo))
+    									if(noEti(l.operando,l.codigo))
+    									{
+    										op=d.convertirDecimal2(l.operando);
+    										if(op>=0 && op<=65535)
+    										{
+    											dirC=true;
+    											inC=op*2;
+    										}
+    									}
     							}
     			}
 	if(dirC)
@@ -689,6 +721,11 @@ import java.io.*;
 		String cL= Integer.toString(conLoc,16);
     	while(cL.length()<4)
     		cL="0"+cL;
+    	if(!dir_ini && !l.codigo.toUpperCase().equals("EQU"))
+    	{
+    		escribirError(linea+"\tFalto especificar la direccion inicial con un Org esta inicio con 0\r\n",archivoErr);
+    		dir_ini=true;
+    	}
     	if(!l.etiqueta.equals("NULL"))
     	{
     		if(!buscarEti(l.etiqueta,l.archiT))
@@ -702,12 +739,37 @@ import java.io.*;
     	}
     	else{
     		escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\r\n",l.archiInst);
-    		conLoc+=inC;    	
+    		conLoc+=inC;    
+    		if(conLoc>65535)
+    		{
+    			escribirError(l.lin+"\tEL conLoc sobrepaso su rango\r\n",archivoErr);
+    			conLoc=0;
+    		}
+    				
     	}
 	}
 	return true;		
 }
 
+public boolean noEti(String operando,String dir)
+{
+	if((operando.charAt(0)>='a'&&operando.charAt(0)<='z')||(operando.charAt(0)>='A'&&operando.charAt(0)<='Z'))
+    {
+    	escribirError(linea+"\tLa directiva "+dir+" no acepta etiquetas como operando\r\n",archivoErr);
+    	return false;
+    }
+    return true;	
+}
+
+public boolean noNULL(String operando,String dir)
+{
+	if(operando.equals("NULL"))
+    {
+    	escribirError(linea+"\tLa directiva "+dir+" debe tener operando\r\n",archivoErr);
+    	return false;
+    }
+    return true;
+}
 public boolean buscarEti(String eti,String archiT)
 {
 	boolean encon=false;
@@ -719,8 +781,9 @@ public boolean buscarEti(String eti,String archiT)
 			StringTokenizer st = new StringTokenizer(l,"\t");
 			String etiq=st.nextToken();
 			if(etiq.equals(eti))
-				encon=true;		
-	}
+				encon=true;
+		}
+		archi.close();
 	}
 	catch(IOException e)
 	{
