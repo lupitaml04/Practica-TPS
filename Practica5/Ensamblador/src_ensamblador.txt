@@ -1,0 +1,4 @@
+E:\Practica4\Ensamblador\src\Ensamblador.java
+E:\Practica4\Ensamblador\src\Linea.java
+E:\Practica4\Ensamblador\src\Modos.java
+E:\Practica4\Ensamblador\src\Tabop.java
