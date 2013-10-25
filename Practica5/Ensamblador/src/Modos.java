@@ -157,29 +157,30 @@ public class Modos {
 		public int convertirDecimal2(String opera){
 		int num=0;
 		if(opera.startsWith("%")){
-            	try{
-						num = Integer.parseInt(opera.substring(1),2);
-					}catch(NumberFormatException ex){
-						num=65536;
-					}
+			try{
+				num = Integer.parseInt(opera.substring(1),2);
+				}
+				catch(NumberFormatException ex){
+					num=65536;
+				}
 		}
 		else
 			if(opera.startsWith("$"))
 			{
-					try{
-						num = Integer.parseInt(opera.substring(1),16);
-						}catch(NumberFormatException ex){
+				try{
+					num = Integer.parseInt(opera.substring(1),16);
+					}catch(NumberFormatException ex){
 						num=65536;
-						}
+					}
 			}
 			else
 				if(opera.startsWith("@"))
 				{
-						try{
-							num = Integer.parseInt(opera.substring(1),8);
-						}catch(NumberFormatException ex){
-							num=65536;
-						}
+					try{
+						num = Integer.parseInt(opera.substring(1),8);
+					}catch(NumberFormatException ex){
+						num=65536;
+					}
 				}
 				else
 				{
@@ -223,9 +224,8 @@ public class Modos {
     }
 
     public boolean  modoImm(String modo){
-    	if((l.operando.charAt(1)>='a' && l.operando.charAt(1)<='z') || (l.operando.charAt(1)>='A' && l.operando.charAt(1)<='Z'))
+    	if(!l.validarOperando(l.operando.substring(1),false))
     	{
-    		e.escribirError(l.lin+"\tEl modo inmediato no acepta etiquetas como operando\r\n",l.archierr);
     		return true;
     	}
     	else
@@ -257,6 +257,10 @@ public class Modos {
 
     public boolean modoDir()
     {
+    	if(!l.validarOperando(l.operando,true))
+    	{
+    		return true;
+    	}
     	if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z') || (l.operando.charAt(0)>='A' && l.operando.charAt(0)<='Z'))
     	{
     		return false;
@@ -273,13 +277,13 @@ public class Modos {
     }
 
     public boolean modoExt()
-    {
+    {  	if(!l.validarOperando(l.operando,true))
+    	{
+    		return true;
+    	}
     	if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z') || (l.operando.charAt(0)>='A' && l.operando.charAt(0)<='Z'))
     	{
-    		if(e.buscarEti(l.operando,l.archiT))
     		validarIns();
-    		else
-    			e.escribirError(l.lin+"\tLa etiqueta no existe\r\n",l.archierr);
     		return true;
     	}
     	oper=convertirDecimal(l.operando);
@@ -297,12 +301,13 @@ public class Modos {
 
     public boolean modoRel(String modo)
     {
+    	if(!l.validarOperando(l.operando,true))
+    	{
+    		return true;	
+    	}
     	if((l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z') || (l.operando.charAt(0)>='A' && l.operando.charAt(0)<='Z'))
     	{
-    		if(e.buscarEti(l.operando,l.archiT))
     		validarIns();
-    		else
-    			e.escribirError(l.lin+"\tLa etiqueta no existe\r\n",l.archierr);
     		return true;
     	}
     	oper=convertirDecimal(l.operando);
@@ -348,7 +353,6 @@ public class Modos {
     public boolean modoIdx()
     {
       	String oper1, oper2 ,operando=l.operando;
-      	Linea li=new Linea(l.lin,l.archierr,l.archiInst,l.archiT);
     	int num;
     	if(l.operando.startsWith("["))
     	{
@@ -363,7 +367,7 @@ public class Modos {
     		e.escribirError(l.lin+"\tFormato de operando invalido para el modo indexado\r\n",l.archierr);
     		return true;
     	}
-    	if(li.validarOperando(oper1))
+    	if(l.validarOperando(oper1,true))
     	if(!((oper1.charAt(0)>='a' && oper1.charAt(0)<='z') || (oper1.charAt(0)>='A' && oper1.charAt(0)<='Z')))
     	{
     		num=convertirDecimal(oper1);
@@ -435,7 +439,7 @@ public class Modos {
     	oper1=l.operando.substring(0,l.operando.indexOf(','));
     	oper2=l.operando.substring(l.operando.indexOf(',')+1);
     	Linea li=new Linea(l.lin,l.archierr,l.archiInst,l.archiT);
-    	if(li.validarOperando(oper1))
+    	if(li.validarOperando(oper1,false))
     	if(!((oper1.charAt(0)>='a' && oper1.charAt(0)<='z') || (oper1.charAt(0)>='A' && oper1.charAt(0)<='Z')))
     	{
     		num=convertirDecimal(oper1);
@@ -483,7 +487,7 @@ public class Modos {
     	    	e.escribirError(l.lin+"\tFormato de operando invalido para el modo indexado\r\n",l.archierr);
     	    	return true;
     	    }
-    	    if(li.validarOperando(oper1))
+    	    if(li.validarOperando(oper1,false))
     	    if(!((oper1.charAt(0)>='a' && oper1.charAt(0)<='z') || (oper1.charAt(0)>='A' && oper1.charAt(0)<='Z')))
     	    {
     	    	num=convertirDecimal(oper1);

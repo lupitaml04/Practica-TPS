@@ -1,4 +1,4 @@
-E:\Practica4\Ensamblador\src\Ensamblador.java
-E:\Practica4\Ensamblador\src\Linea.java
-E:\Practica4\Ensamblador\src\Modos.java
-E:\Practica4\Ensamblador\src\Tabop.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica5\Ensamblador\src\Ensamblador.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica5\Ensamblador\src\Linea.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica5\Ensamblador\src\Modos.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica5\Ensamblador\src\Tabop.java

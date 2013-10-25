@@ -67,19 +67,7 @@ public class Linea{
 		operando=op;
 	}
 
-	public boolean validarOperando(String oper){
-		//texto.indexOf("\"",c+1)
-
-		operando=oper;
-		if(oper.indexOf("\"",0)>0)
-			return true;
-		if(operando.indexOf(',') >-1)
-		{
-			return true;
-		}
-		if(oper.charAt(0)=='#')
-			oper=oper.substring(1);
-
+	public boolean validarOperando(String oper, boolean eti){
 		if(oper.charAt(0)=='%')
 		{
 			oper=oper.substring(1);
@@ -122,40 +110,57 @@ public class Linea{
             		}
             	}
             	else
-            		 	if(oper.charAt(0)=='-' ||(oper.charAt(0) >='0'&& oper.charAt(0)<='9'))
-            		 	{
-            		 		Pattern pat = Pattern.compile("-?[0-9]{1,}");
-            		 		Matcher mat = pat.matcher(oper);
-            		 		if (mat.matches()) {
-            		 			return true;
-            		 		}
-            		 		else{
-            		 			p.escribirError(lin+"\tFormato de operando invalido se esperaba un numero decimal\r\n",archierr);
-            		 			return false;
-            		 		}
+            		 if(oper.charAt(0)=='-' ||(oper.charAt(0) >='0'&& oper.charAt(0)<='9'))
+            		 {
+            		 	Pattern pat = Pattern.compile("-?[0-9]{1,}");
+            		 	Matcher mat = pat.matcher(oper);
+            		 	if (mat.matches()) {
+            		 		return true;
             		 	}
-            		 	else
+            		 	else{
+            		 		p.escribirError(lin+"\tFormato de operando invalido se esperaba un numero decimal\r\n",archierr);
+            		 		return false;
+            		 	}
+            		 }
+            		 else
             		 	{
-            		 		if(oper.length()>8)
+            		 		Pattern pat = Pattern.compile("^[a-zA-Z][a-zA-Z_0-9]{0,}");
+            		 		Matcher mat = pat.matcher(oper);
+            		 		if (mat.matches())
             		 		{
-            		 			p.escribirError(lin+"\tLa etiqueta del operador se paso de longitud\r\n",archierr);
-            		 			return false;
+            		 			if(oper.length()>8)
+            		 			{
+            		 				if(eti)
+            		 				{
+            		 					p.escribirError(lin+"\tLa etiqueta del operando se paso de longitud\r\n",archierr);
+            		 					return false;
+            		 				}
+            		 				else{
+            		 					p.escribirError(lin+"\tFormato de Operando invalido\r\n",archierr);
+            		 					return false;
+            		 				}
+            		 				
+            		 			}
+            		 			if(eti)
+            		 			return true;
+            		 			else{
+            		 				p.escribirError(lin+"\t"+codigo+" No  acepta etiquetas como operando\t\r",archierr);
+            		 				return false;
+            		 			}
             		 		}
             		 		else
             		 			{
-            		 				Pattern pat = Pattern.compile("^[a-zA-Z][a-zA-Z_0-9]{0,7}");
-            		 				Matcher mat = pat.matcher(oper);
-            		 				if (mat.matches())
+            		 				if(eti)
             		 				{
-            		 					return true;
+            		 					p.escribirError(lin+"\tLa etiqueta en el lugar del operando no es valida\r\n",archierr);
+            		 					return false;
             		 				}
-            		 				else
-            		 					{
-            		 						p.escribirError(lin+"\tLa etiqueta en el lugar del operando no es valida\r\n",archierr);
-            		 						return false;
-            		 					}
+            		 				else{
+            		 					p.escribirError(lin+"\tFormato de operando invalido\r\n",archierr);
+            		 					return false;
+            		 				}	
             		 			}
-
             		 	}
 		}
+
 }
