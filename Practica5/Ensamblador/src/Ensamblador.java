@@ -9,6 +9,8 @@
 
 import java.util.*;
 import java.io.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
  class Ensamblador {
         String ruta, texto, archivo,archivoInst,archivoErr,archivoT;
@@ -43,7 +45,9 @@ import java.io.*;
         	{
         		if(fichero.getName().toUpperCase().endsWith(".ASM")){
         			leerTabop();
-                    crearArchivos();
+                    crearArchivoErr();
+                    crearArchivoTds();
+                    crearArchvoInst();
                     leerArchivo();
                 }
               else{
@@ -53,45 +57,51 @@ import java.io.*;
         else
         	System.out.println("La ruta no existe");
      }
-
-        public void crearArchivos(){
-                archivoInst=ruta.substring(0,ruta.indexOf('.'))+".INST";
-                archivoErr=ruta.substring(0,ruta.indexOf('.'))+".ERR";
-                archivoT=ruta.substring(0,ruta.indexOf('.'))+".TDS";
+     
+     public void crearArchivoErr(){
+     	archivoErr=ruta.substring(0,ruta.indexOf('.'))+".ERR";
+     	File err = new File(archivoErr);
+     	if(err.exists())
+     		err.delete();
+     	try{
+     		BufferedWriter archierr = new BufferedWriter(new FileWriter(new File(archivoErr), true));
+     		archierr.write("\tERRORES\r\n............................................\r\n");
+     		archierr.close();
+     		}
+            catch(IOException e2){
+            	System.out.println("Error al crear archivo de errores");
+            	}
+     }
+     
+     public void crearArchivoTds(){
+     	archivoT=ruta.substring(0,ruta.indexOf('.'))+".TDS";
+     	File tds =new File(archivoT);
+     	 if(tds.exists())
+     	 	tds.delete();
+     	  try{
+     	  	BufferedWriter archiT = new BufferedWriter(new FileWriter(new File(archivoT), true));
+     	  	archiT.write("ETIQUETA\tVALOR\r\n............................................\r\n");
+     	  	archiT.close();
+     	  	}
+            catch(IOException e3){
+            	System.out.println("Error al crear archivo de tabla de simbolos");
+            }
+     }
+     	
+        public void crearArchvoInst(){
+        	archivoInst=ruta.substring(0,ruta.indexOf('.'))+".INST";   
                 File inst = new File(archivoInst);
-                File err = new File(archivoErr);
-                File tds =new File(archivoT);
                  if(inst.exists())
                          inst.delete();
-                 if(err.exists())
-                         err.delete();
-                 if(tds.exists())
-                         tds.delete();
-                try{
+                 try{
                         BufferedWriter archinst = new BufferedWriter(new FileWriter(new File(archivoInst), true));
                         archinst.write("LINEA\t\tCONTLOC\t\tETQ\t\tCODOP\t\tOPER\t\tMODOS");
                         archinst.write("\r\n...........................................................\r\n");
                         archinst.close();
-                }
+                     }
             catch(IOException e){
-                                        System.out.println("Error al crear archivo de instrucciones");
-                    }
-            try{
-                    BufferedWriter archierr = new BufferedWriter(new FileWriter(new File(archivoErr), true));
-                         archierr.write("\tERRORES\r\n............................................\r\n");
-                        archierr.close();
-                }
-            catch(IOException e2){
-                           System.out.println("Error al crear archivo de errores");
-            }
-            try{
-                    BufferedWriter archiT = new BufferedWriter(new FileWriter(new File(archivoT), true));
-                        archiT.write("ETIQUETA\tVALOR\r\n............................................\r\n");
-                        archiT.close();
-                }
-            catch(IOException e3){
-                           System.out.println("Error al crear archivo de tabla de simbolos");
-            }
+            	System.out.println("Error al crear archivo de instrucciones");
+            }     
         }
 
         public void leerArchivo() {
@@ -110,6 +120,8 @@ import java.io.*;
                 catch(IOException e){
                 	System.out.println("Error");
                 }
+                revisarInst();
+                calcularCM();
         }
 
     public void revisarLinea(){
@@ -163,7 +175,7 @@ import java.io.*;
                       case 3:
                       	if(cont==tam)
                       	{
-                      		escribirError(linea +"        No hay Codigo de operacion\r\n",archivoErr);
+                      		escribirError(linea +"\tNo hay Codigo de operacion\r\n",archivoErr);
                       		edo=10;
                       	}else
                       		if(cad[cont]==';')
@@ -383,10 +395,9 @@ import java.io.*;
                       break;
      }
     }
-            if(etiq && cod)
-            {
-                    buscarCodop(lin);
-            }
+    if(etiq && cod){
+    	buscarCodop(lin);
+    	}
     }
 
     public void escribirError(String error, String archi){
@@ -401,11 +412,9 @@ import java.io.*;
               }
     }
 
-    public void escribirInstruccion(int lin, String instruccion,String archiI){
-         String l= Integer.toString(lin);
+    public void escribirInstruccion(String instruccion,String archiI){
             try{
                     BufferedWriter archinst = new BufferedWriter(new FileWriter(new File(archiI), true));
-                    archinst.write(l);
                     archinst.write(instruccion);
                     archinst.close();
                    }
@@ -421,7 +430,7 @@ import java.io.*;
                     archiT.write(eti);
                     archiT.write("\t\t");
                     archiT.write(valor);
-                    archiT.write("\r\n");
+                    archiT.write("\t\t\r\n");
                     archiT.close();
                 }
               catch(IOException e){
@@ -585,13 +594,13 @@ import java.io.*;
                     								if(!buscarEti(l.etiqueta,l.archiT))
                     								{
                     									escribirSimbolo(l.etiqueta,cL,l.archiT);
-                    									escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\r\n",l.archiInst);
+                    									escribirInstruccion(l.lin+"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t \t \t\r\n",l.archiInst);
                     								}
                     								else
                     									escribirError(l.lin+"\tLa etiqueta se repitio\r\n",l.archierr);
                     							}
                     							else{
-                    								escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\r\n",l.archiInst);
+                    								escribirInstruccion(l.lin+"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t \t \t\r\n",l.archiInst);
                     							}
                     							}
                     							else{
@@ -724,14 +733,14 @@ import java.io.*;
             	if(!buscarEti(l.etiqueta,l.archiT))
             	{
             		escribirSimbolo(l.etiqueta,cL,l.archiT);
-            		escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\r\n",l.archiInst);
+            		escribirInstruccion(l.lin+"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t \t"+inC+"\t\r\n",l.archiInst);
             		conLoc+=inC;
             	}
             	else
                     escribirError(l.lin+"\tLa etiqueta se repitio\r\n",l.archierr);
             }
             else{
-                    escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\r\n",l.archiInst);
+                    escribirInstruccion(l.lin+"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t \t"+inC+"\t\r\n",l.archiInst);
                     conLoc+=inC;
                     if(conLoc>65535)
                     {
@@ -774,6 +783,263 @@ public boolean buscarEti(String eti,String archiT)
         }
         return encon;
 }
+
+public int revisarInst()
+{
+	Vector<String> ins= new Vector<String>();
+	String lIns,linea,valor,etiqueta,codop,operando,modir,tam,cL="";
+	int mal=0;
+	try
+		{
+			RandomAccessFile archi=new RandomAccessFile(new File(archivoInst),"r");
+			archi.readLine();
+			archi.readLine();
+			while(archi.getFilePointer()!=archi.length())
+			{
+				lIns=archi.readLine();
+				StringTokenizer st = new StringTokenizer(lIns,"\t");
+				linea=st.nextToken();
+				valor=st.nextToken();
+				etiqueta=st.nextToken();
+				codop=st.nextToken();
+				operando=st.nextToken();
+				modir=st.nextToken();
+				//System.out.println(linea+"\t"+codop+"\t"+modir);
+				tam=st.nextToken();
+				Pattern pat = Pattern.compile("^[a-zA-Z][a-zA-Z_0-9]{0,}");
+            	Matcher mat = pat.matcher(operando);
+            	while(cL.length()<4)
+            		cL="0"+cL;
+            	if (mat.matches()&& !operando.equals("NULL"))
+            	{
+            		if(buscarEti(operando,archivoT))
+            		{
+            			if(mal==0||ins.size()==0)
+            			{
+            				System.out.println("bien 1  "+mal);
+            				lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
+            				if(codop.equals("ORG"))
+            					cL=valor;
+            				else
+            					if(!codop.equals("EQU"))
+            					{
+            						cL=Integer.toHexString(Integer.parseInt(valor,16)+Integer.parseInt(tam));
+            						
+            					}
+            				ins.add(lIns);
+            			}
+            			else{
+            				System.out.println("mal 1  "+mal);
+            				valor=cL;
+            				lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
+            				if(codop.equals("ORG"))
+            					cL=valor;
+            				else
+            					if(!codop.equals("EQU"))
+            					{
+            						cL=Integer.toHexString(Integer.parseInt(valor,16)+Integer.parseInt(tam));
+            						while(cL.length()<4)
+            							cL="0"+cL;
+            					}
+            					ins.add(lIns);
+            			}   			
+            		}
+            		else{
+            			mal++;
+            			escribirError(linea+"\tLa etiqueta del operando no existe\r\n",archivoErr);
+            		}		
+            	}
+            	else
+            	{
+            		if(mal==0||ins.size()==0)
+            			{System.out.println("bien 2  "+mal);
+            				lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
+            				if(codop.equals("ORG"))
+            					cL=valor;
+            				else
+            					if(!codop.equals("EQU"))
+            						cL=Integer.toHexString(Integer.parseInt(valor,16)+Integer.parseInt(tam));
+            				ins.add(lIns);
+            			}
+            			else{
+            				System.out.println("mal 2  "+mal);
+            				valor=cL;
+            				lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
+            				if(codop.equals("ORG"))
+            					cL=valor;
+            				else
+            					if(!codop.equals("EQU"))
+            						cL=Integer.toHexString(Integer.parseInt(valor,16)+Integer.parseInt(tam));
+            					ins.add(lIns);
+            			}		
+            	}
+			}
+			archi.close();
+		}
+		catch(IOException e){
+			System.out.println("Error al abrir archivo de instrucciones");
+		}
+		crearArchvoInst();
+		for(int i=0;i<ins.size();i++)
+		escribirInstruccion(ins.elementAt(i),archivoInst);
+		return mal;
+}
+
+public String valorEti(String eti)
+{
+        try{
+                RandomAccessFile archi=new RandomAccessFile(new File(archivoT),"r");
+                archi.readLine();
+                archi.readLine();
+                while(archi.getFilePointer()!=archi.length())
+                {
+                	String l=archi.readLine();
+                	StringTokenizer st = new StringTokenizer(l,"\t\t");
+                	String etiq=st.nextToken();
+                	String valor=st.nextToken();
+                	if(etiq.equals(eti))
+                		return valor;
+                }
+                archi.close();
+        }
+        catch(IOException e)
+        {
+        	System.out.println("Error al abrir archivo TDS");
+        }
+      return null;
+}
+
+public void calcularCM(){
+		Vector<String> ins= new Vector<String>();
+		try
+		{
+			RandomAccessFile archi=new RandomAccessFile(new File(archivoInst),"r");
+			archi.readLine();
+			archi.readLine();
+			while(archi.getFilePointer()!=archi.length())
+			{
+				String lIns,comaq=null,linea_, valor,etiqueta, codop, operando, modir;
+				boolean bcod=false;
+				Tabop ta=new Tabop();
+				lIns=archi.readLine();
+				StringTokenizer st = new StringTokenizer(lIns,"\t");
+				linea_=st.nextToken();
+				valor=st.nextToken();
+				etiqueta=st.nextToken();
+				codop=st.nextToken();
+				operando=st.nextToken();
+				modir=st.nextToken();
+				comaq="";
+				for(int i=0; i<tabop.size() && !bcod; i++)
+				{
+					Tabop t=new Tabop();
+					t=tabop.elementAt(i);
+					if(codop.toUpperCase().equals(t.cod))
+					{
+						System.out.println(codop+"\t"+t.cod);
+						ta=t;
+						bcod=true;
+					}
+				}
+				if(bcod)
+				{
+					boolean encon=false;
+					int j=0;
+					for(int i=0; i<ta.modir.size()&& !encon;i++)
+					{
+						if(ta.modir.elementAt(i).equals(modir))
+						{
+							j=i;
+							encon=true;
+						}
+					}
+					
+					System.out.println(ta.cod+"  "+j);
+					if(modir.equals("INH") || modir.equals("IMM"))
+					{
+						comaq=ta.comaq.elementAt(j);
+					}
+					else
+						if(ta.modir.elementAt(j).equals("DIR"))
+						{
+							comaq=ta.comaq.elementAt(j)+convertirHexa(operando,1);
+						}
+						else
+							if(ta.modir.elementAt(j).equals("EXT"))
+							{
+								Pattern pat = Pattern.compile("^[a-zA-Z][a-zA-Z_0-9]{0,}");
+								Matcher mat = pat.matcher(operando);
+								if (mat.matches())
+								{
+									comaq=ta.comaq.elementAt(j)+valorEti(operando);
+								}
+								else{
+									comaq=ta.comaq.elementAt(j)+convertirHexa(operando,2);	
+								}
+							}
+							else
+								if(ta.modir.elementAt(j).equals("IMM8")){
+									comaq=ta.comaq.elementAt(j)+convertirHexa(operando.substring(1),1);
+								}
+								else
+									if(ta.modir.elementAt(j).equals("IMM16")){
+										comaq=ta.comaq.elementAt(j)+convertirHexa(operando.substring(1),2);
+								}
+								
+							lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\r\n";
+				}
+				else
+					lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t\r\n";
+					System.out.println(lIns);
+				ins.add(lIns);
+			}
+			archi.close();
+		}
+		catch(IOException e){
+			System.out.println("Error al abrir archivo de instrucciones");
+		}
+		crearArchvoInst();
+		for(int i=0;i<ins.size();i++)
+			escribirInstruccion(ins.elementAt(i),archivoInst);
+
+}
+public String convertirHexa(String cad, int bt)
+{
+	System.out.println(cad);
+	if(cad.startsWith("$"))
+	{
+		cad=cad.substring(1);
+		while(cad.length()<bt*2)
+			cad="0"+cad;
+	}
+	else
+		if(cad.startsWith("%"))
+		{
+			cad=Integer.toHexString(Integer.parseInt(cad.substring(1),2));
+			while(cad.length()<bt*2)
+				cad="0"+cad;
+			while(cad.length()>bt*2)
+					cad=cad.substring(1);
+		}
+		else
+			if(cad.startsWith("@"))
+			{
+				cad=Integer.toHexString(Integer.parseInt(cad.substring(1),8));
+				while(cad.length()<bt*2)
+					cad="0"+cad;
+				while(cad.length()>bt*2)
+					cad=cad.substring(1);
+			}
+			else{
+				cad=Integer.toHexString(Integer.parseInt(cad));
+				while(cad.length()<bt*2)
+					cad="0"+cad;
+				while(cad.length()>bt*2)
+					cad=cad.substring(1);
+					
+			}
+			return cad.toUpperCase();
+} 
     public static void main(String[] args){
             Scanner Leer=new Scanner(System.in);
             String ruta="";

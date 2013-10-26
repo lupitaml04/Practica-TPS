@@ -76,18 +76,18 @@ public class Modos {
 								}
 						if(!encontrado)
 						{
-								for(i=0;i< t.modir.size() && !encontrado; i++)
+							for(i=0;i< t.modir.size() && !encontrado; i++)
+							{
+								if(t.modir.elementAt(i).equals("DIR"))
 								{
-										if(t.modir.elementAt(i).equals("DIR"))
-										{
-											encontrado=modoDir();
-										}
-										else
-											if(t.modir.elementAt(i).equals("EXT"))
-											{
-												encontrado=modoExt();
-											}
+									encontrado=modoDir();
 								}
+								else
+									if(t.modir.elementAt(i).equals("EXT"))
+									{
+										encontrado=modoExt();
+									}
+							}
 					}
 			}
 			else
@@ -571,19 +571,16 @@ public void validarIns()
     	if(!e.buscarEti(l.etiqueta,l.archiT))
     	{	String cL=conLoc();
     		e.escribirSimbolo(l.etiqueta,cL,l.archiT);
-    		e.escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\t\t"+t.modir.elementAt(i)+"\r\n",l.archiInst);
-    		System.out.println(cL+"  "+ t.btotal.elementAt(i)+"  "+l.operando);
+    		e.escribirInstruccion(l.lin+"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+t.modir.elementAt(i)+"\t"+t.btotal.elementAt(i)+"\r\n",l.archiInst);
     	}
     	else
     		{
     			e.escribirError(l.lin+"\tLa etiqueta se repitio\r\n",l.archierr);
     		}
-
-
     }
 	else{
 			String cL=conLoc();
-		e.escribirInstruccion(l.lin,"\t\t"+cL+"\t\t"+ l.etiqueta+"\t\t"+l.codigo+"\t\t"+l.operando+"\t\t"+t.modir.elementAt(i)+"\r\n",l.archiInst);
+		e.escribirInstruccion(l.lin+"\t"+cL+"\t"+ l.etiqueta+"\t"+l.codigo+"\t"+l.operando+"\t"+t.modir.elementAt(i)+"\t"+t.btotal.elementAt(i)+"\r\n",l.archiInst);
 	}
 }
 
