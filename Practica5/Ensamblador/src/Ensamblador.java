@@ -95,7 +95,7 @@ import java.util.regex.Matcher;
                          inst.delete();
                  try{
                         BufferedWriter archinst = new BufferedWriter(new FileWriter(new File(archivoInst), true));
-                        archinst.write("LINEA\t\tCONTLOC\t\tETQ\t\tCODOP\t\tOPER\t\tMODOS");
+                        archinst.write("LINEA\tCONTLOC\tETQ\tCODOP\tOPER\tMODOS\tCOMAQ");
                         archinst.write("\r\n...........................................................\r\n");
                         archinst.close();
                      }
@@ -120,8 +120,12 @@ import java.util.regex.Matcher;
                 catch(IOException e){
                 	System.out.println("Error");
                 }
-                revisarInst();
-                calcularCM();
+                int errores=contError();
+                if(revisarInst()==0 && errores ==0)
+                	calcularCM();
+                else{
+                	escribirError("\tErrores: "+errores+" No se puede pasar al paso 2 del ensamblador",archivoErr);
+                }
         }
 
     public void revisarLinea(){
@@ -604,7 +608,7 @@ import java.util.regex.Matcher;
                     							}
                     							}
                     							else{
-                    								escribirError(l.lin+"\tEl operando se paso de rango para la directiva"+l.codigo +"\r\n",l.archierr);
+                    								escribirError(l.lin+"\tEl operando se paso de rango para la directiva "+l.codigo +"\r\n",l.archierr);
                     							}
                     						}
                     					}
@@ -663,8 +667,7 @@ import java.util.regex.Matcher;
                                             			escribirError(l.lin+"\tFormato de operando invalido para "+l.codigo +"\r\n",l.archierr);
                                             			return true;
                                                      }
-                                                     int c=0,tam=l.operando.length()-2;
-                                                     System.out.println(tam+"\t"+l.operando.length());
+                                                     int c=0,tam=l.operando.length()-2;                                                     
                                                      char ca;
                                                      while(c!=l.operando.length())
                                                      {
@@ -677,7 +680,7 @@ import java.util.regex.Matcher;
                                                      		{
                                                      			c++;
                                                      			tam--;
-                                                     		}System.out.println(tam);
+                                                     		}
                                                      	}
                                                      	}
                                                      	dirC=true;
@@ -804,7 +807,6 @@ public int revisarInst()
 				codop=st.nextToken();
 				operando=st.nextToken();
 				modir=st.nextToken();
-				//System.out.println(linea+"\t"+codop+"\t"+modir);
 				tam=st.nextToken();
 				Pattern pat = Pattern.compile("^[a-zA-Z][a-zA-Z_0-9]{0,}");
             	Matcher mat = pat.matcher(operando);
@@ -816,7 +818,6 @@ public int revisarInst()
             		{
             			if(mal==0||ins.size()==0)
             			{
-            				System.out.println("bien 1  "+mal);
             				lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
             				if(codop.equals("ORG"))
             					cL=valor;
@@ -829,7 +830,6 @@ public int revisarInst()
             				ins.add(lIns);
             			}
             			else{
-            				System.out.println("mal 1  "+mal);
             				valor=cL;
             				lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
             				if(codop.equals("ORG"))
@@ -852,7 +852,7 @@ public int revisarInst()
             	else
             	{
             		if(mal==0||ins.size()==0)
-            			{System.out.println("bien 2  "+mal);
+            			{
             				lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
             				if(codop.equals("ORG"))
             					cL=valor;
@@ -862,7 +862,6 @@ public int revisarInst()
             				ins.add(lIns);
             			}
             			else{
-            				System.out.println("mal 2  "+mal);
             				valor=cL;
             				lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
             				if(codop.equals("ORG"))
@@ -936,7 +935,6 @@ public void calcularCM(){
 					t=tabop.elementAt(i);
 					if(codop.toUpperCase().equals(t.cod))
 					{
-						System.out.println(codop+"\t"+t.cod);
 						ta=t;
 						bcod=true;
 					}
@@ -953,8 +951,6 @@ public void calcularCM(){
 							encon=true;
 						}
 					}
-					
-					System.out.println(ta.cod+"  "+j);
 					if(modir.equals("INH") || modir.equals("IMM"))
 					{
 						comaq=ta.comaq.elementAt(j);
@@ -984,13 +980,11 @@ public void calcularCM(){
 								else
 									if(ta.modir.elementAt(j).equals("IMM16")){
 										comaq=ta.comaq.elementAt(j)+convertirHexa(operando.substring(1),2);
-								}
-								
+								}		
 							lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\r\n";
 				}
 				else
 					lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t\r\n";
-					System.out.println(lIns);
 				ins.add(lIns);
 			}
 			archi.close();
@@ -1005,41 +999,36 @@ public void calcularCM(){
 }
 public String convertirHexa(String cad, int bt)
 {
-	System.out.println(cad);
-	if(cad.startsWith("$"))
-	{
+	Modos m=new Modos();
+	cad=Integer.toHexString(m.convertirDecimal(cad));
+	while(cad.length()<bt*2)
+		cad="0"+cad;
+	
+	while(cad.length()>bt*2)
 		cad=cad.substring(1);
-		while(cad.length()<bt*2)
-			cad="0"+cad;
-	}
-	else
-		if(cad.startsWith("%"))
-		{
-			cad=Integer.toHexString(Integer.parseInt(cad.substring(1),2));
-			while(cad.length()<bt*2)
-				cad="0"+cad;
-			while(cad.length()>bt*2)
-					cad=cad.substring(1);
-		}
-		else
-			if(cad.startsWith("@"))
-			{
-				cad=Integer.toHexString(Integer.parseInt(cad.substring(1),8));
-				while(cad.length()<bt*2)
-					cad="0"+cad;
-				while(cad.length()>bt*2)
-					cad=cad.substring(1);
-			}
-			else{
-				cad=Integer.toHexString(Integer.parseInt(cad));
-				while(cad.length()<bt*2)
-					cad="0"+cad;
-				while(cad.length()>bt*2)
-					cad=cad.substring(1);
-					
-			}
+	System.out.println(cad);
 			return cad.toUpperCase();
 } 
+
+public int contError()
+{
+	int error=0;
+	try{
+		RandomAccessFile archi=new RandomAccessFile(new File(archivoErr),"r");
+		archi.readLine();
+		archi.readLine();
+		while(archi.getFilePointer()!=archi.length())
+		{
+			archi.readLine();
+			error++;
+		}
+		archi.close();
+		}
+		catch(IOException e){
+			System.out.println("Error");
+			}
+	return error;
+}
     public static void main(String[] args){
             Scanner Leer=new Scanner(System.in);
             String ruta="";

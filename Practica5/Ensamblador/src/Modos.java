@@ -10,6 +10,8 @@ public class Modos {
 		this.t=t;
 		this.conLoc=conLoc;
 	}
+	public Modos(){
+	}
 
 	public int buscarModo(){
 		boolean encontrado=false;
