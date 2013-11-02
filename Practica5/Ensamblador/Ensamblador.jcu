@@ -39,4 +39,13 @@
 			<active>false</active>
 		</docitem>
 	</open_files>
+	<breakpoints>
+		<breakpoint>
+			<path>src\Ensamblador.java</path>
+			<class/>
+			<session/>
+			<line>1045</line>
+			<enable>true</enable>
+		</breakpoint>
+	</breakpoints>
 </workspace_user>
