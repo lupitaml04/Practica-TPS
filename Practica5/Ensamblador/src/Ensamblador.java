@@ -120,12 +120,13 @@ import java.util.regex.Matcher;
                 catch(IOException e){
                 	System.out.println("Error");
                 }
-                int errores=contError();
-                //if(revisarInst()==0 && errores ==0)
+                int errores=contError(), mal=revisarInst();
+                
+                if(mal==0 && errores ==0)
                 	calcularCM();
-                /*else{
+                else{
                 	escribirError("\tErrores: "+errores+" No se puede pasar al paso 2 del ensamblador",archivoErr);
-                }*/
+                }
         }
 
     public void revisarLinea(){
@@ -869,20 +870,18 @@ public void recalConLoc(Vector<String> inst,int mal){
 		while(cL.length()<4)
 			cL="0"+cL;
 		if(mal==0)
-		{
-			lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
-			if(codop.equals("ORG"))
-				cL=valor;
-				else
-					if(!codop.equals("EQU"))
-						cL=Integer.toHexString(Integer.parseInt(valor,16)+Integer.parseInt(tam));
-            		ins.add(lIns);
+		{		
+            lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
+            ins.add(lIns);
+            		
             if(!etiqueta.equals("NULL"))
            			escribirSimbolo(etiqueta,valor,archivoT);
-         }
+          }
            else{
+           	if(!codop.equals("EQU"))
            	valor=cL;
            	lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
+           	
            	if(codop.equals("ORG"))
            		cL=valor;
            		else
