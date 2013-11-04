@@ -57,7 +57,7 @@ import java.util.regex.Matcher;
         else
         	System.out.println("La ruta no existe");
      }
-     
+
      public void crearArchivoErr(){
      	archivoErr=ruta.substring(0,ruta.indexOf('.'))+".ERR";
      	File err = new File(archivoErr);
@@ -72,7 +72,7 @@ import java.util.regex.Matcher;
             	System.out.println("Error al crear archivo de errores");
             	}
      }
-     
+
      public void crearArchivoTds(){
      	archivoT=ruta.substring(0,ruta.indexOf('.'))+".TDS";
      	File tds =new File(archivoT);
@@ -87,9 +87,9 @@ import java.util.regex.Matcher;
             	System.out.println("Error al crear archivo de tabla de simbolos");
             }
      }
-     	
+
         public void crearArchvoInst(){
-        	archivoInst=ruta.substring(0,ruta.indexOf('.'))+".INST";   
+        	archivoInst=ruta.substring(0,ruta.indexOf('.'))+".INST";
                 File inst = new File(archivoInst);
                  if(inst.exists())
                          inst.delete();
@@ -101,7 +101,7 @@ import java.util.regex.Matcher;
                      }
             catch(IOException e){
             	System.out.println("Error al crear archivo de instrucciones");
-            }     
+            }
         }
 
         public void leerArchivo() {
@@ -121,11 +121,11 @@ import java.util.regex.Matcher;
                 	System.out.println("Error");
                 }
                 int errores=contError(), mal=revisarInst();
-                
+
                 if(mal==0 && errores ==0)
                 	calcularCM();
                 else{
-                	escribirError("\tErrores: "+errores+" No se puede pasar al paso 2 del ensamblador",archivoErr);
+                	escribirError("No se puede pasar al paso 2 del ensamblador",archivoErr);
                 }
         }
 
@@ -546,7 +546,8 @@ import java.util.regex.Matcher;
         			if(!(l.operando.charAt(0)>='a' && l.operando.charAt(0)<='z' )||!(l.operando.charAt(0)>='A'&& l.operando.charAt(0)<='z'))
         				{
         					Modos mo=new Modos(l,new Tabop(),conLoc);
-        					conLoc=mo.convertirDecimal2(l.operando);
+        					conLoc=mo.convertirDecimal(l.operando);
+        					System.out.println("conloc"+ conLoc);
         					if(conLoc>=0 &&conLoc<=65535)
         					{
         						dirC=true;
@@ -668,7 +669,7 @@ import java.util.regex.Matcher;
                                             			escribirError(l.lin+"\tFormato de operando invalido para "+l.codigo +"\r\n",l.archierr);
                                             			return true;
                                                      }
-                                                     int c=0,tam=l.operando.length()-2;                                                     
+                                                     int c=0,tam=l.operando.length()-2;
                                                      char ca;
                                                      while(c!=l.operando.length())
                                                      {
@@ -791,7 +792,7 @@ public boolean buscarEti(String eti,String archiT)
 public int revisarInst()
 {
 	Vector<String> ins= new Vector<String>();
-	
+
 	String lIns,linea,valor,etiqueta,codop,operando,modir,tam,cL="0000";
 	int mal=0;
 	try
@@ -809,7 +810,7 @@ public int revisarInst()
 		catch(IOException e){
 			System.out.println("Error al abrir archivo de instrucciones");
 		}
-		
+
 		boolean continua=true;
 		while(continua){
 			continua=false;
@@ -843,21 +844,21 @@ public int revisarInst()
             			}
             			ins.remove(j);
             			j--;
-            		}		
+            		}
             	}
 			}
-		}	
+		}
 		recalConLoc(ins,mal);
 		return mal;
 }
 
 public void recalConLoc(Vector<String> inst,int mal){
-	
+
 	Vector<String> ins=new Vector<String>();
 	String cL="0000";
 	crearArchivoTds();
 	for(int i=0; i<inst.size();i++)
-	{		
+	{
 		String lIns=inst.elementAt(i);
 		StringTokenizer st = new StringTokenizer(lIns,"\t");
 		String linea=st.nextToken();
@@ -870,24 +871,29 @@ public void recalConLoc(Vector<String> inst,int mal){
 		while(cL.length()<4)
 			cL="0"+cL;
 		if(mal==0)
-		{		
-            lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
+		{
+			System.out.println("mal");
+            lIns=linea+"\t"+ valor.toUpperCase()+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
             ins.add(lIns);
-            		
+
             if(!etiqueta.equals("NULL"))
            			escribirSimbolo(etiqueta,valor,archivoT);
           }
            else{
-           	if(!codop.equals("EQU"))
-           	valor=cL;
-           	lIns=linea+"\t"+ valor+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
-           	
+           	System.out.println("mal");
+           	if(!codop.equals("ORG") && !codop.equals("EQU"))
+           		valor=cL;
+           	lIns=linea+"\t"+ valor.toUpperCase()+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
            	if(codop.equals("ORG"))
            		cL=valor;
            		else
            			if(!codop.equals("EQU"))
            				cL=Integer.toHexString(Integer.parseInt(valor,16)+Integer.parseInt(tam));
-           				ins.add(lIns);
+
+
+           	ins.add(lIns);
+
+
            		if(!etiqueta.equals("NULL"))
            			escribirSimbolo(etiqueta,valor,archivoT);
            		}
@@ -983,7 +989,7 @@ public void calcularCM(){
 									comaq=ta.comaq.elementAt(j)+valorEti(operando);
 								}
 								else{
-									comaq=ta.comaq.elementAt(j)+convertirHexa(operando,2);	
+									comaq=ta.comaq.elementAt(j)+convertirHexa(operando,2);
 								}
 							}
 							else
@@ -993,7 +999,7 @@ public void calcularCM(){
 								else
 									if(ta.modir.elementAt(j).equals("IMM16")){
 										comaq=ta.comaq.elementAt(j)+convertirHexa(operando.substring(1),2);
-								}		
+								}
 							lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\r\n";
 				}
 				else
@@ -1016,12 +1022,12 @@ public String convertirHexa(String cad, int bt)
 	cad=Integer.toHexString(m.convertirDecimal(cad));
 	while(cad.length()<bt*2)
 		cad="0"+cad;
-	
+
 	while(cad.length()>bt*2)
 		cad=cad.substring(1);
 	System.out.println(cad);
 			return cad.toUpperCase();
-} 
+}
 
 public boolean elimEti(String eti)
 {
@@ -1060,7 +1066,7 @@ public boolean elimEti(String eti)
                 	String val=st.nextToken();
                 	escribirSimbolo(etiq,val,archivoT);
         	}
-        	
+
         }
         return encon;
 }
