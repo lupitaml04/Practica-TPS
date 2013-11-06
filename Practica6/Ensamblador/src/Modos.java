@@ -366,7 +366,7 @@ public class Modos {
     	oper2=operando.substring(operando.indexOf(',')+1);
     	if(operando.length()<3)
     	{
-    		e.escribirError(l.lin+"\tFormato de operando invalido para el modo indexado\r\n",l.archierr);
+    		e.escribirError(l.lin+"\tFormato de operando invalido para el modo indexado 1\r\n",l.archierr);
     		return true;
     	}
     	if(l.validarOperando(oper1,true))
@@ -405,7 +405,7 @@ public class Modos {
     					return false;
     			}
     			else
-    				e.escribirError(l.lin+"\tFormato de registro invalido para el modo indexado\r\n",l.archierr);
+    				e.escribirError(l.lin+"\tFormato de registro invalido para el modo indexado  4\r\n",l.archierr);
     			return true;
     		}
     	}
@@ -445,7 +445,7 @@ public class Modos {
     	if(!((oper1.charAt(0)>='a' && oper1.charAt(0)<='z') || (oper1.charAt(0)>='A' && oper1.charAt(0)<='Z')))
     	{
     		num=convertirDecimal(oper1);
-    		if((num>= -256 && num<= 255) && (oper2.toUpperCase().equals("X")|| oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") || oper2.equals("PC")))
+    		if((num>= -256 && num<= 255) && (oper2.toUpperCase().equals("X")|| oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") || oper2.toUpperCase().equals("PC")))
     		{
     			validarIns();
     			return true;
@@ -469,10 +469,15 @@ public class Modos {
     	oper1=l.operando.substring(0,l.operando.indexOf(','));
     	oper2=l.operando.substring(l.operando.indexOf(',')+1);
     	num=convertirDecimal(oper1);
-    	if((num>= 0 && num<= 65535) && (oper2.toUpperCase().equals("X")|| oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") || oper2.equals("PC")))
-    	{
-    		validarIns();
-    		return true;
+    	if(num>= 0 && num<= 65535){
+    		if(oper2.toUpperCase().equals("X")|| oper2.toUpperCase().equals("Y") || oper2.toUpperCase().equals("SP") || oper2.toUpperCase().equals("PC"))
+    		{
+    			validarIns();
+    			return true;
+    		}		
+    	}
+    	else{
+    		e.escribirError(l.lin+"\tOperando fuera de rango para el modo indexado\r\n",l.archierr);
     	}
     	return false;
     }
@@ -486,7 +491,7 @@ public class Modos {
     	    Linea li=new Linea(l.lin,l.archierr,l.archiInst,l.archiT);
     	    if(oper1.length()==0 || oper2.length()==0)
     	    {
-    	    	e.escribirError(l.lin+"\tFormato de operando invalido para el modo indexado\r\n",l.archierr);
+    	    	e.escribirError(l.lin+"\tFormato de operando invalido para el modo indexado 2\r\n",l.archierr);
     	    	return true;
     	    }
     	    if(li.validarOperando(oper1,false))
@@ -510,7 +515,7 @@ public class Modos {
     	    }
     	}
     	else{
-    		e.escribirError(l.lin+"Formato operando Invalido para modo indexado",l.archierr);
+    		e.escribirError(l.lin+"Formato operando Invalido para modo indexado 5",l.archierr);
     	}
     	return true;
     }
@@ -535,7 +540,7 @@ public class Modos {
     	    }
     	}
     	else{
-    		e.escribirError(l.lin+"\tFormato de operando invalido para modo indexado\r\n",l.archierr);
+    		e.escribirError(l.lin+"\tFormato de operando invalido para modo indexado 6\r\n",l.archierr);
     	return true;
     	}
     	return false;

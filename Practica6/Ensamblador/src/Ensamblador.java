@@ -122,11 +122,11 @@ import java.util.regex.Matcher;
                 }
                 int errores=contError(), mal=revisarInst();
 
-                if(mal==0 && errores ==0)
+                //if(mal==0 && errores ==0)
                 	calcularCM();
-                else{
+                /*else{
                 	escribirError("No se puede pasar al paso 2 del ensamblador",archivoErr);
-                }
+                }*/
         }
 
     public void revisarLinea(){
@@ -929,6 +929,7 @@ public String valorEti(String eti)
 
 public void calcularCM(){
 		Vector<String> ins= new Vector<String>();
+		Modos m= new Modos();
 		try
 		{
 			RandomAccessFile archi=new RandomAccessFile(new File(archivoInst),"r");
@@ -999,8 +1000,98 @@ public void calcularCM(){
 								else
 									if(ta.modir.elementAt(j).equals("IMM16")){
 										comaq=ta.comaq.elementAt(j)+convertirHexa(operando.substring(1),2);
-								}
-							lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\r\n";
+									}
+									else
+										if(ta.modir.elementAt(j).equals("IDX"))
+										{
+											String rr=null,aa=null,xb=null,nnnnn=null,p=null;
+											String oper1=operando.substring(0,operando.indexOf(','));
+											String oper2=operando.substring(operando.indexOf(',')+1);
+											if(oper1.toUpperCase().equals("A")||oper1.toUpperCase().equals("B")||oper1.toUpperCase().equals("D"))
+											{		
+												rr=regresaRr(oper2);
+												System.out.println("rr "+rr);
+												if(oper1.toUpperCase().equals("A"))
+													aa="00";
+													else
+														if(oper1.toUpperCase().equals("B"))
+															aa="01";
+															else
+																if(oper1.toUpperCase().equals("D"))
+																	aa="10";
+												
+												xb="111"+rr+"1"+aa;
+												
+											}
+											else
+												if(oper2.startsWith("-") || oper2.startsWith("+")||oper2.endsWith("-") || oper2.endsWith("+"))
+												{
+													if(oper2.startsWith("-") || oper2.startsWith("+"))
+													{
+														rr=regresaRr(oper2.substring(1));
+														p="0";
+													}	
+													else{
+														rr=regresaRr(oper2.substring(0,oper2.length()-1));
+														p="1";	
+													}
+														int s;
+													if(oper2.startsWith("-")||oper2.endsWith("-"))
+													{
+														nnnnn=Integer.toBinaryString((m.convertirDecimal(oper1))*(-1));	
+													}
+													else
+													{
+														nnnnn=Integer.toBinaryString((m.convertirDecimal(oper1)-1));	
+													}
+													
+													while(nnnnn.length()<4)
+														nnnnn="0"+nnnnn;
+													while(nnnnn.length()>4)
+														nnnnn=nnnnn.substring(1);
+													System.out.println("nnnnn "+nnnnn);
+													xb=	rr+"1"+p+nnnnn;		
+												}
+												else{
+													rr=regresaRr(oper2);
+													nnnnn=Integer.toBinaryString(m.convertirDecimal(oper1));
+													while(nnnnn.length()<5)
+														nnnnn="0"+nnnnn;
+													while(nnnnn.length()>5)
+														nnnnn=nnnnn.substring(1);
+													xb=rr+"0"+nnnnn;
+													}
+													System.out.println(linea_+"  "+xb);
+											comaq=ta.comaq.elementAt(j)+convertirHexa("%"+xb,1);
+									}
+									else
+										if(ta.modir.elementAt(j).equals("IDX1"))
+										{
+											String xb, rr,z="0",s,oper1=operando.substring(0,operando.indexOf(',')), oper2=operando.substring(operando.indexOf(',')+1);	
+											rr=regresaRr(oper2);
+											if(m.convertirDecimal(oper1)<0)
+												s="1";
+											else
+												s="0";
+											
+											xb="111"+rr+"0"+z+s;
+												System.out.println(linea_+"  "+xb);
+											comaq=ta.comaq.elementAt(j)+convertirHexa("%"+xb,1)+convertirHexa(oper1,1);
+										}
+										else
+											if(ta.modir.elementAt(j).equals("IDX2"))
+											{
+												String xb, rr,z="1",s,oper1=operando.substring(0,operando.indexOf(',')), oper2=operando.substring(operando.indexOf(',')+1);	
+													rr=regresaRr(oper2);
+												if(m.convertirDecimal(oper1)<0)
+													s="1";
+													else
+														s="0";
+												xb="111"+rr+"0"+z+s;
+												System.out.println(linea_+"  " +xb);
+												comaq=ta.comaq.elementAt(j)+convertirHexa("%"+xb,1)+convertirHexa(oper1,2);
+											}
+										lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\r\n";
 				}
 				else
 					lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t\r\n";
@@ -1016,6 +1107,23 @@ public void calcularCM(){
 			escribirInstruccion(ins.elementAt(i),archivoInst);
 
 }
+
+public String regresaRr(String oper){
+	String rr=null;
+	if(oper.toUpperCase().equals("X"))
+		rr= "00";
+		else
+			if(oper.toUpperCase().equals("Y"))
+				rr= "01";
+				else
+					if(oper.toUpperCase().equals("SP"))
+						rr= "10";
+						else
+							if(oper.toUpperCase().equals("PC"))
+								rr="11";
+	return rr;
+}
+
 public String convertirHexa(String cad, int bt)
 {
 	Modos m=new Modos();
