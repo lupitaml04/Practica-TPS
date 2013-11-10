@@ -125,7 +125,6 @@ public class Modos {
 					num=complementoADos(hexBin(opera.substring(1)));
 
 				}
-
 				else
 					try{
 						num = Integer.parseInt(opera.substring(1),16);
@@ -136,7 +135,7 @@ public class Modos {
 			else
 				if(opera.startsWith("@"))
 				{
-					if(opera.charAt(1)==7)
+					if(opera.charAt(1)=='7')
 					num=complementoADos(octBin(opera.substring(1)));
 					else
 						try{
@@ -596,7 +595,6 @@ public String conLoc(){
     while(cL.length()<4)
     cL="0"+cL;
     conLoc=conLoc+Integer.parseInt(t.btotal.elementAt(i));
-    System.out.println(l.lin+"  "+t.modir.elementAt(i)+" "+Integer.toString(conLoc,16));
     return cL;
 }
 }

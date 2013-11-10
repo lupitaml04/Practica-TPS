@@ -19,7 +19,6 @@ import java.util.regex.Matcher;
         int conLoc=0;
         boolean end,eOrg=false, dir_ini=false;
         Vector dir= new Vector();
-
         public Ensamblador(String r){
                 ruta=r;
                 dir.add("DB");
@@ -122,11 +121,11 @@ import java.util.regex.Matcher;
                 }
                 int errores=contError(), mal=revisarInst();
 
-                //if(mal==0 && errores ==0)
+                if(mal==0 && errores ==0)
                 	calcularCM();
-                /*else{
+                else{
                 	escribirError("No se puede pasar al paso 2 del ensamblador",archivoErr);
-                }*/
+                }
         }
 
     public void revisarLinea(){
@@ -325,14 +324,12 @@ import java.util.regex.Matcher;
                       						while(!fc && c<texto.length())
                       						{
                       							c=texto.indexOf("\"",c+1);
-                      							System.out.println(c);
                       							if(c<0)
                       								c=texto.length();
                       								else
                       									if(texto.charAt(c-1)!='\\'){
                       										fc=true;
                       										lin.opera(texto.substring(cont,c+1));
-                      										System.out.println(texto.substring(cont,c+1));
                       										cont+=texto.substring(cont,c+1).length();
                       										edo=9;
                       										op=true;
@@ -547,7 +544,6 @@ import java.util.regex.Matcher;
         				{
         					Modos mo=new Modos(l,new Tabop(),conLoc);
         					conLoc=mo.convertirDecimal(l.operando);
-        					System.out.println("conloc"+ conLoc);
         					if(conLoc>=0 &&conLoc<=65535)
         					{
         						dirC=true;
@@ -633,7 +629,6 @@ import java.util.regex.Matcher;
                                     		if(l.validarOperando(l.operando,false))
                                     		{
                                     			op=d.convertirDecimal(l.operando);
-                                    			System.out.println(l.operando+" "+op);
                                     			if(op>=0 && op<=255)
                                     			{
                                     				dirC=true;
@@ -792,7 +787,6 @@ public boolean buscarEti(String eti,String archiT)
 public int revisarInst()
 {
 	Vector<String> ins= new Vector<String>();
-
 	String lIns,linea,valor,etiqueta,codop,operando,modir,tam,cL="0000";
 	int mal=0;
 	try
@@ -814,11 +808,9 @@ public int revisarInst()
 		boolean continua=true;
 		while(continua){
 			continua=false;
-			System.out.println("while");
 			for(int j=0; j< ins.size() && !continua; j++)
 			{
 				lIns=ins.elementAt(j);
-				System.out.println(lIns);
 				StringTokenizer st = new StringTokenizer(lIns,"\t");
 				linea=st.nextToken();
 				valor=st.nextToken();
@@ -833,7 +825,6 @@ public int revisarInst()
             		cL="0"+cL;
             	if (mat.matches()&& !operando.equals("NULL"))
             	{
-            		System.out.println("eti");
             		if(!buscarEti(operando,archivoT))
             		{
             			mal++;
@@ -853,7 +844,6 @@ public int revisarInst()
 }
 
 public void recalConLoc(Vector<String> inst,int mal){
-
 	Vector<String> ins=new Vector<String>();
 	String cL="0000";
 	crearArchivoTds();
@@ -872,15 +862,12 @@ public void recalConLoc(Vector<String> inst,int mal){
 			cL="0"+cL;
 		if(mal==0)
 		{
-			System.out.println("mal");
             lIns=linea+"\t"+ valor.toUpperCase()+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
             ins.add(lIns);
-
             if(!etiqueta.equals("NULL"))
            			escribirSimbolo(etiqueta,valor,archivoT);
           }
            else{
-           	System.out.println("mal");
            	if(!codop.equals("ORG") && !codop.equals("EQU"))
            		valor=cL;
            	lIns=linea+"\t"+ valor.toUpperCase()+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\r\n";
@@ -889,11 +876,7 @@ public void recalConLoc(Vector<String> inst,int mal){
            		else
            			if(!codop.equals("EQU"))
            				cL=Integer.toHexString(Integer.parseInt(valor,16)+Integer.parseInt(tam));
-
-
            	ins.add(lIns);
-
-
            		if(!etiqueta.equals("NULL"))
            			escribirSimbolo(etiqueta,valor,archivoT);
            		}
@@ -1010,7 +993,6 @@ public void calcularCM(){
 											if(oper1.toUpperCase().equals("A")||oper1.toUpperCase().equals("B")||oper1.toUpperCase().equals("D"))
 											{		
 												rr=regresaRr(oper2);
-												System.out.println("rr "+rr);
 												if(oper1.toUpperCase().equals("A"))
 													aa="00";
 													else
@@ -1018,10 +1000,8 @@ public void calcularCM(){
 															aa="01";
 															else
 																if(oper1.toUpperCase().equals("D"))
-																	aa="10";
-												
-												xb="111"+rr+"1"+aa;
-												
+																	aa="10";	
+												xb="111"+rr+"1"+aa;	
 											}
 											else
 												if(oper2.startsWith("-") || oper2.startsWith("+")||oper2.endsWith("-") || oper2.endsWith("+"))
@@ -1049,7 +1029,6 @@ public void calcularCM(){
 														nnnnn="0"+nnnnn;
 													while(nnnnn.length()>4)
 														nnnnn=nnnnn.substring(1);
-													System.out.println("nnnnn "+nnnnn);
 													xb=	rr+"1"+p+nnnnn;		
 												}
 												else{
@@ -1061,7 +1040,6 @@ public void calcularCM(){
 														nnnnn=nnnnn.substring(1);
 													xb=rr+"0"+nnnnn;
 													}
-													System.out.println(linea_+"  "+xb);
 											comaq=ta.comaq.elementAt(j)+convertirHexa("%"+xb,1);
 									}
 									else
@@ -1072,10 +1050,8 @@ public void calcularCM(){
 											if(m.convertirDecimal(oper1)<0)
 												s="1";
 											else
-												s="0";
-											
+												s="0";	
 											xb="111"+rr+"0"+z+s;
-												System.out.println(linea_+"  "+xb);
 											comaq=ta.comaq.elementAt(j)+convertirHexa("%"+xb,1)+convertirHexa(oper1,1);
 										}
 										else
@@ -1088,7 +1064,6 @@ public void calcularCM(){
 													else
 														s="0";
 												xb="111"+rr+"0"+z+s;
-												System.out.println(linea_+"  " +xb);
 												comaq=ta.comaq.elementAt(j)+convertirHexa("%"+xb,1)+convertirHexa(oper1,2);
 											}
 											else
@@ -1097,7 +1072,6 @@ public void calcularCM(){
 													String rr,xb, oper1=operando.substring(1,operando.indexOf(',')), oper2=operando.substring(operando.indexOf(',')+1, operando.length()-1);
 													rr=regresaRr(oper2);
 													xb="111"+rr+"011";
-													System.out.println(linea_+"  "+xb);
 													comaq=ta.comaq.elementAt(j)+convertirHexa("%"+xb,1)+convertirHexa(oper1,2);
 												}
 												else
@@ -1152,7 +1126,6 @@ public String convertirHexa(String cad, int bt)
 
 	while(cad.length()>bt*2)
 		cad=cad.substring(1);
-	System.out.println(cad);
 			return cad.toUpperCase();
 }
 
@@ -1187,13 +1160,11 @@ public boolean elimEti(String eti)
         	for(int i=0; i<tSim.size();i++)
         	{
         		String lin=tSim.elementAt(i);
-        		System.out.println(lin);
-                	StringTokenizer st = new StringTokenizer(lin,"\t\t");
-                	String etiq=st.nextToken();
-                	String val=st.nextToken();
-                	escribirSimbolo(etiq,val,archivoT);
+        		StringTokenizer st = new StringTokenizer(lin,"\t\t");
+        		String etiq=st.nextToken();
+        		String val=st.nextToken();
+        		escribirSimbolo(etiq,val,archivoT);
         	}
-
         }
         return encon;
 }
