@@ -431,7 +431,7 @@ import java.util.regex.Matcher;
                     BufferedWriter archiT = new BufferedWriter(new FileWriter(new File(archivoT), true));
                     archiT.write(eti);
                     archiT.write("\t\t");
-                    archiT.write(valor);
+                    archiT.write(valor.toUpperCase());
                     archiT.write("\t\t\r\n");
                     archiT.close();
                 }
