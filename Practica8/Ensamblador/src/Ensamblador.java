@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
         int conLoc=0;
         boolean end,eOrg=false, dir_ini=false;
         Vector dir= new Vector();
+        Vector<String> tabSim=new Vector();
         public Ensamblador(String r){
                 ruta=r;
                 dir.add("DB");
@@ -76,7 +77,9 @@ import java.util.regex.Matcher;
      	archivoT=ruta.substring(0,ruta.indexOf('.'))+".TDS";
      	File tds =new File(archivoT);
      	 if(tds.exists())
+     	 {
      	 	tds.delete();
+     	 }
      	  try{
      	  	BufferedWriter archiT = new BufferedWriter(new FileWriter(new File(archivoT), true));
      	  	archiT.write("ETIQUETA\tVALOR\r\n............................................\r\n");
@@ -120,12 +123,13 @@ import java.util.regex.Matcher;
                 	System.out.println("Error");
                 }
                 Vector<String> ins=guardaInst();
+                guardaTabSim();
                 int errores=contError(), mal=ins.size();
                 ins=revisarInst(ins);
                 mal=mal-ins.size();
+                ins=recalConLoc(ins,mal);
                 if(mal==0 && errores ==0)
-                	ins=calcularCM(ins);
-                
+                	ins=calcularCM(ins);   
                 else{
                 	escribirError("No se puede pasar al paso 2 del ensamblador",archivoErr);
                 }
@@ -133,6 +137,12 @@ import java.util.regex.Matcher;
 		crearArchvoInst();
 		for(int i=0;i<ins.size();i++)
 			escribirInstruccion(ins.elementAt(i),archivoInst);
+		crearArchivoTds();
+		for(int i=0;i<tabSim.size();i++){
+			StringTokenizer st = new StringTokenizer(tabSim.elementAt(i),"\t\t");
+			escribirSimbolo(st.nextToken(),st.nextToken(),archivoT);
+		}
+			
         }
 
     public void revisarLinea(){
@@ -435,7 +445,7 @@ import java.util.regex.Matcher;
     public void escribirSimbolo(String eti,String valor, String archi){
             archivoT=archi;
             try{
-                    BufferedWriter archiT = new BufferedWriter(new FileWriter(new File(archivoT), true));
+                    BufferedWriter archiT = new BufferedWriter(new FileWriter(new File(archivoT), true));  
                     archiT.write(eti);
                     archiT.write("\t\t");
                     archiT.write(valor.toUpperCase());
@@ -791,6 +801,19 @@ public boolean buscarEti(String eti,String archiT)
         return encon;
 }
 
+public boolean buscarEti2(String eti)
+{
+	for(int i=0;i<tabSim.size();i++)
+	{
+		String l=tabSim.elementAt(i);
+		StringTokenizer st = new StringTokenizer(l,"\t");
+		String etiq=st.nextToken();
+		if(etiq.equals(eti))
+			return true;
+	}       
+        return false;
+}
+
 public Vector<String> revisarInst(Vector<String> ins)
 {
 	String lIns,linea,valor,etiqueta,codop,operando,modir,tam,cL="0000";
@@ -815,7 +838,7 @@ public Vector<String> revisarInst(Vector<String> ins)
             		cL="0"+cL;
             	if (mat.matches()&& !operando.equals("NULL"))
             	{
-            		if(!buscarEti(operando,archivoT))
+            		if(!buscarEti2(operando))
             		{
             			mal++;
             			escribirError(linea+"\tLa etiqueta del operando no existe\r\n",archivoErr);
@@ -829,7 +852,7 @@ public Vector<String> revisarInst(Vector<String> ins)
             	}
 			}
 		}
-		return recalConLoc(ins,mal);
+		return ins;
 }
 
 public Vector<String> guardaInst(){
@@ -854,16 +877,33 @@ public Vector<String> guardaInst(){
 		return ins;
 }
 
+public void guardaTabSim(){
+	String ts;
+	try
+		{
+			RandomAccessFile archi=new RandomAccessFile(new File(archivoT),"r");
+			archi.readLine();
+			archi.readLine();
+			while(archi.getFilePointer()!=archi.length())
+			{
+				ts=archi.readLine();
+				tabSim.add(ts);
+			}
+			archi.close();
+		}
+		catch(IOException e){
+			System.out.println("Error al abrir archivo de instrucciones");
+		}
+}
+
 public Vector<String> recalConLoc(Vector<String> inst,int mal){
-	System.out.println("Recal conloc  "+mal);
 	Vector<String> ins=new Vector<String>();
 	String cL="0000";
-	crearArchivoTds();	
+	tabSim.clear();	
 	for(int i=0; i<inst.size();i++)
 	{
 		int tam=0;
 		String lIns=inst.elementAt(i);
-		System.out.println(lIns);
 		StringTokenizer st = new StringTokenizer(lIns,"\t");
 		String linea=st.nextToken();
 		String valor=st.nextToken();
@@ -878,23 +918,23 @@ public Vector<String> recalConLoc(Vector<String> inst,int mal){
             lIns=linea+"\t"+ valor.toUpperCase()+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\t\r\n";
             ins.add(lIns);
             if(!etiqueta.equals("NULL"))
-           			escribirSimbolo(etiqueta,valor,archivoT);
+           		tabSim.add(etiqueta+"\t\t"+valor+"\t\t\r\n");
         }
            else
            	{
            		tam=tamIns(codop,operando,modir);
-           		if(!codop.equals("ORG") && !codop.equals("EQU"))
-           			valor=cL;
+           		if(!codop.toUpperCase().equals("ORG") && !codop.toUpperCase().equals("EQU")){
+           		valor=cL;
+           		}
            		lIns=linea+"\t"+ valor.toUpperCase()+"\t" +etiqueta+"\t"+codop+"\t"+operando+"\t"+ modir+"\t\r\n";
-           		System.out.println(lIns);
            		if(codop.equals("ORG"))
-           			cL=valor;
+           			cL=valor;	
            			else
            				if(!codop.equals("EQU"))
            					cL=Integer.toHexString(Integer.parseInt(valor,16)+tam);
            				ins.add(lIns);
            				if(!etiqueta.equals("NULL"))
-           					escribirSimbolo(etiqueta,valor,archivoT);
+           					tabSim.add(etiqueta+"\t\t"+valor+"\t\t\r\n");
            		}
 	}
 	return ins;		
@@ -956,74 +996,64 @@ public int tamIns(String codop,String operando,String modir){
 }
 public String valorEti(String eti)
 {
-        try{
-                RandomAccessFile archi=new RandomAccessFile(new File(archivoT),"r");
-                archi.readLine();
-                archi.readLine();
-                while(archi.getFilePointer()!=archi.length())
-                {
-                	String l=archi.readLine();
-                	StringTokenizer st = new StringTokenizer(l,"\t\t");
-                	String etiq=st.nextToken();
-                	String valor=st.nextToken();
-                	if(etiq.equals(eti))
-                		return valor;
-                }
-                archi.close();
-        }
-        catch(IOException e)
-        {
-        	System.out.println("Error al abrir archivo TDS");
-        }
+	String l,etiq,valor;
+	for(int i=0; i<tabSim.size();i++)
+	{
+		l=tabSim.elementAt(i);
+		StringTokenizer st = new StringTokenizer(l,"\t\t");
+		etiq=st.nextToken();
+		valor=st.nextToken();
+		if(etiq.equals(eti))
+			return valor;
+	}
       return null;
 }
 
 public Vector<String> calcularCM(Vector<String> ins){
 		Vector<String> inst= new Vector<String>();	
 		Modos m= new Modos();
-			for(int k=0;k<ins.size();k++)
+		for(int k=0;k<ins.size();k++)
+		{
+			boolean mal=false, bcod=false;
+			String lIns,comaq=null,linea_, valor,etiqueta, codop, operando, modir;
+			Tabop ta=new Tabop();
+			lIns=ins.elementAt(k);
+			System.out.println(lIns);
+			StringTokenizer st = new StringTokenizer(lIns,"\t");
+			linea_=st.nextToken();
+			valor=st.nextToken();
+			etiqueta=st.nextToken();
+			codop=st.nextToken();
+			operando=st.nextToken();
+			modir=st.nextToken();
+			comaq="";
+			for(int i=0; i<tabop.size() && !bcod; i++)
 			{
-				String lIns,comaq=null,linea_, valor,etiqueta, codop, operando, modir;
-				boolean bcod=false;
-				Tabop ta=new Tabop();
-				lIns=ins.elementAt(k);
-				StringTokenizer st = new StringTokenizer(lIns,"\t");
-				linea_=st.nextToken();
-				valor=st.nextToken();
-				etiqueta=st.nextToken();
-				codop=st.nextToken();
-				operando=st.nextToken();
-				modir=st.nextToken();
-				comaq="";
-				for(int i=0; i<tabop.size() && !bcod; i++)
+				Tabop t=new Tabop();
+				t=tabop.elementAt(i);
+				if(codop.toUpperCase().equals(t.cod))
 				{
-					Tabop t=new Tabop();
-					t=tabop.elementAt(i);
-					if(codop.toUpperCase().equals(t.cod))
+					ta=t;
+					bcod=true;
+				}
+			}
+			if(bcod)
+			{
+				boolean encon=false;
+				int j=0;
+				for(int i=0; i<ta.modir.size()&& !encon;i++)
+				{
+					if(ta.modir.elementAt(i).equals(modir))
 					{
-						ta=t;
-						bcod=true;
+						j=i;
+						encon=true;
 					}
 				}
-				if(bcod)
-				{
-					boolean encon=false;
-					int j=0;
-					for(int i=0; i<ta.modir.size()&& !encon;i++)
-					{
-						if(ta.modir.elementAt(i).equals(modir))
-						{
-							j=i;
-							encon=true;
-						}
-					}
-					if(modir.equals("INH") || modir.equals("IMM"))
-					{
-						comaq=ta.comaq.elementAt(j);
+				if(modir.equals("INH") || modir.equals("IMM")){
+					comaq=ta.comaq.elementAt(j);
 					}
 					else
-						if(modir.equals("DIR"))
-						{
+						if(modir.equals("DIR")){
 							comaq=ta.comaq.elementAt(j)+convertirHexa(operando,1);
 						}
 						else
@@ -1031,8 +1061,7 @@ public Vector<String> calcularCM(Vector<String> ins){
 							{
 								Pattern pat = Pattern.compile("^[a-zA-Z][a-zA-Z_0-9]{0,}");
 								Matcher mat = pat.matcher(operando);
-								if (mat.matches())
-								{
+								if (mat.matches()){
 									comaq=ta.comaq.elementAt(j)+valorEti(operando);
 								}
 								else{
@@ -1150,12 +1179,16 @@ public Vector<String> calcularCM(Vector<String> ins){
 														if(modir.equals("REL8"))
 														{
 															int rr;
-															if(operando.charAt(0)<='a' && operando.charAt(0)<='z' || operando.charAt(0)<='A' && operando.charAt(0)<='Z')
-																rr=Integer.parseInt(valorEti(operando),16)-(Integer.parseInt(valor,16)+2);
+															System.out.println(valorEti(operando)+"  "+valor);
+															if(operando.charAt(0)>='a' && operando.charAt(0)<='z' || operando.charAt(0)>='A' && operando.charAt(0)<='Z')
+															{
+																rr=Integer.parseInt(valorEti(operando),16);
+																rr=rr-(Integer.parseInt(valor,16)+2);
+															}
+																
 															else
 																rr=m.convertirDecimal(operando)-(Integer.parseInt(valor,16)+2);
 																if(rr>=-128 && rr<=127){
-																	System.out.println("rr  "+rr);
 																	comaq=comaq=ta.comaq.elementAt(j)+convertirHexa(""+rr,1);	
 																}
 																else{
@@ -1163,17 +1196,32 @@ public Vector<String> calcularCM(Vector<String> ins){
 																	inst.clear();
 																	ins.remove(k);
 																	ins=revisarInst(ins);
-																	k=-1;
+																	ins=recalConLoc(ins,1);
+																	elimEti(etiqueta);
+																	k=-1;	
+																	mal=true;
 																}						
 														}
 														else
 															if(modir.equals("REL16"))
 															{
 																int rr;
-																if(operando.charAt(0)<='a' && operando.charAt(0)<='z' || operando.charAt(0)<='A' && operando.charAt(0)<='Z')
+																if(operando.charAt(0)>='a' && operando.charAt(0)<='z' || operando.charAt(0)>='A' && operando.charAt(0)<='Z')
 																	rr=Integer.parseInt(valorEti(operando),16)-(Integer.parseInt(valor,16)+4);
 																	else
 																		rr=m.convertirDecimal(operando)-(Integer.parseInt(valor,16)+4);
+																if(rr>=-32768 && rr<=32767){
+																	comaq=comaq=ta.comaq.elementAt(j)+convertirHexa(""+rr,2);	
+																}
+																else{
+																	escribirError(linea_+"\tEl desplazamiento se salio de rango\r\n",archivoErr);
+																	ins.remove(k);
+																	ins=revisarInst(ins);
+																	ins=recalConLoc(ins,1);
+																	elimEti(etiqueta);
+																	k=-1;
+																	mal=true;
+																}	
 															}
 
 							lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\r\n";
@@ -1181,6 +1229,8 @@ public Vector<String> calcularCM(Vector<String> ins){
 				else
 					lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t\r\n";
 				inst.add(lIns);
+				if(mal)
+					inst.clear();
 			}
 		return inst;
 }
@@ -1215,43 +1265,20 @@ public String convertirHexa(String cad, int bt)
 
 public boolean elimEti(String eti)
 {
-	Vector<String> tSim=new Vector<String>();
-	boolean encon=false;
-        try{
-                RandomAccessFile archi=new RandomAccessFile(new File(archivoT),"r");
-                archi.readLine();
-                archi.readLine();
-                while(archi.getFilePointer()!=archi.length())
-                {
-                	String l=archi.readLine();
-                	StringTokenizer st = new StringTokenizer(l,"\t");
-                	String etiq=st.nextToken();
-                	if(etiq.equals(eti))
-                		encon=true;
-                	else{
-                		tSim.add(l);
-                	}
-                }
-                archi.close();
-        }
-        catch(IOException e)
-        {
-                System.out.println("Error al abrir archivo TDS");
-        }
-        if(encon)
-        {
-        	crearArchivoTds();
-        	for(int i=0; i<tSim.size();i++)
-        	{
-        		String lin=tSim.elementAt(i);
-        		StringTokenizer st = new StringTokenizer(lin,"\t\t");
-        		String etiq=st.nextToken();
-        		String val=st.nextToken();
-        		escribirSimbolo(etiq,val,archivoT);
-        	}
-        }
-        return encon;
+	String l,etiq;
+	for(int i=0;i<tabSim.size();i++)
+	{
+		l=tabSim.elementAt(i);
+		StringTokenizer st = new StringTokenizer(l,"\t");
+		etiq=st.nextToken();
+		if(etiq.equals(eti)){
+			tabSim.remove(i);
+			return true;
+		}
+	}
+	return false;
 }
+
 public int contError()
 {
 	int error=0;
