@@ -1,0 +1,4 @@
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica9\Ensamblador\src\Ensamblador.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica9\Ensamblador\src\Linea.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica9\Ensamblador\src\Modos.java
+C:\Users\Lupita\Documents\GitHub\Practica-TPS\Practica9\Ensamblador\src\Tabop.java
