@@ -38,19 +38,13 @@
 			<index>3</index>
 			<active>false</active>
 		</docitem>
-		<docitem>
-			<path>..\..\..\..\..\..\..\Program Files\Java\jdk1.7.0_25\src.zip!java\util\StringTokenizer.java</path>
-			<source>true</source>
-			<index>4</index>
-			<active>false</active>
-		</docitem>
 	</open_files>
 	<breakpoints>
 		<breakpoint>
 			<path>src\Ensamblador.java</path>
 			<class/>
 			<session/>
-			<line>1225</line>
+			<line>1265</line>
 			<enable>true</enable>
 		</breakpoint>
 	</breakpoints>

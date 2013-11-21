@@ -967,10 +967,23 @@ public int tamIns(String codop,String operando,String modir){
 								c++;
 								tama--;
 							}
+							tam=tama;
 						}
 				}
-				tam=tama;
 			}
+			else
+					if(i>=7 && i<=9)
+					{
+						Modos m=new Modos();
+						tam=m.convertirDecimal(operando);
+					}
+					else
+						if(i==10 || i==11)
+						{
+							Modos m=new Modos();
+							tam=m.convertirDecimal(operando)*2;
+						}
+				
 			bcod=true;
 		}
 	}
@@ -1195,9 +1208,10 @@ public Vector<String> calcularCM(Vector<String> ins){
 																	escribirError(linea_+"\tEl desplazamiento se salio de rango\r\n",archivoErr);
 																	inst.clear();
 																	ins.remove(k);
+																	elimEti(etiqueta);
 																	ins=revisarInst(ins);
 																	ins=recalConLoc(ins,1);
-																	elimEti(etiqueta);
+																	
 																	k=-1;	
 																	mal=true;
 																}						
@@ -1206,6 +1220,7 @@ public Vector<String> calcularCM(Vector<String> ins){
 															if(modir.equals("REL16"))
 															{
 																int rr;
+																System.out.println(valorEti(operando)+"  "+valor+ " ,"+operando+",");
 																if(operando.charAt(0)>='a' && operando.charAt(0)<='z' || operando.charAt(0)>='A' && operando.charAt(0)<='Z')
 																	rr=Integer.parseInt(valorEti(operando),16)-(Integer.parseInt(valor,16)+4);
 																	else
@@ -1216,9 +1231,10 @@ public Vector<String> calcularCM(Vector<String> ins){
 																else{
 																	escribirError(linea_+"\tEl desplazamiento se salio de rango\r\n",archivoErr);
 																	ins.remove(k);
+																	elimEti(etiqueta);
 																	ins=revisarInst(ins);
 																	ins=recalConLoc(ins,1);
-																	elimEti(etiqueta);
+																	
 																	k=-1;
 																	mal=true;
 																}	
