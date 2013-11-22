@@ -142,6 +142,10 @@ import java.util.regex.Matcher;
 			StringTokenizer st = new StringTokenizer(tabSim.elementAt(i),"\t\t");
 			escribirSimbolo(st.nextToken(),st.nextToken(),archivoT);
 		}
+		if(contError()==0)
+		{
+			archivoObjeto(ins);
+		}
 
         }
 
@@ -1364,6 +1368,80 @@ public int contError()
 			}
 	return error;
 }
+
+public void archivoObjeto(Vector<String> ins){
+	String archivobjeto,nombre;
+	File f=new File(ruta);
+	nombre=ruta.substring(0,1)+": "+f.getName()+'\n';
+	System.out.println(nombre+" ");
+	archivobjeto=ruta.substring(0,ruta.indexOf('.'))+".OBJ";
+	
+	File obj = new File(archivobjeto);
+	if(obj.exists())
+		obj.delete();
+	try{
+		BufferedWriter archiobj = new BufferedWriter(new FileWriter(new File(archivobjeto), true));
+		for(int i=0;i<ins.size();i++)
+		{
+			String tipo, tam, dir, dato="", s,check,direccion, codop, comaq;
+			StringTokenizer st = new StringTokenizer(ins.elementAt(i),"\t");
+			st.nextToken();
+			direccion=st.nextToken();
+			st.nextToken();
+			codop=st.nextToken();
+			st.nextToken();
+			st.nextToken();
+			comaq=st.nextToken();
+			
+			if(codop.toUpperCase().equals("ORG"))
+			{   
+				tipo="S0";
+				dir="0000";
+				boolean sigue=true;
+				int cont=0;
+				while(sigue)
+				{
+					dato="";
+					for(int j=0;j<=16 && cont<nombre.length();j++)
+					{
+						String d=convertirHexa(""+(int)nombre.charAt(j),1);
+						System.out.println(nombre.charAt(cont)+"  "+d);
+						dato+=d;
+						cont ++;
+					}
+					
+					if(cont<nombre.length())
+						sigue=true;
+					else
+						sigue=false;
+					
+					tam=convertirHexa(""+((dato.length()/2)+3),1);
+					s=tipo+tam+dir+dato+calculaCheck(tam+dir+dato);
+					archiobj.write(s+"\r\n");
+					System.out.println(dato+"  "+ s +"tam"+ ((dato.length()/2)+3));
+				}				
+			}			
+		}
+		archiobj.write("S9030000FC");
+		archiobj.close();
+                     }
+            catch(IOException e){
+            	System.out.println("Error al crear archivo de instrucciones");
+            }
+}
+
+public String calculaCheck(String cadena){
+	System.out.println("cadena "+cadena);
+	int suma=0;
+	for(int i=0;i<cadena.length();i+=2)
+	{	
+		String car=(""+cadena.charAt(i)+cadena.charAt(i+1));
+		suma+=Integer.parseInt(car,16);
+		System.out.println("suma "+suma +" "+car);
+	}
+	return convertirHexa(""+~suma,1);
+}
+
     public static void main(String[] args){
             Scanner Leer=new Scanner(System.in);
             String ruta="";
