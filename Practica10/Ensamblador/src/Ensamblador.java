@@ -1402,9 +1402,9 @@ public void archivoObjeto(Vector<String> ins){
 				while(sigue)
 				{
 					dato="";
-					for(int j=0;j<=16 && cont<nombre.length();j++)
+					for(int j=0;j<16 && cont<nombre.length();j++)
 					{
-						String d=convertirHexa(""+(int)nombre.charAt(j),1);
+						String d=convertirHexa(""+(int)nombre.charAt(cont),1);
 						System.out.println(nombre.charAt(cont)+"  "+d);
 						dato+=d;
 						cont ++;
@@ -1437,7 +1437,6 @@ public String calculaCheck(String cadena){
 	{	
 		String car=(""+cadena.charAt(i)+cadena.charAt(i+1));
 		suma+=Integer.parseInt(car,16);
-		System.out.println("suma "+suma +" "+car);
 	}
 	return convertirHexa(""+~suma,1);
 }
