@@ -1294,10 +1294,10 @@ public Vector<String> calcularCM(Vector<String> ins){
 																}
 															}
 
-							lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\r\n";
+							lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\t\t\r\n";
 				}
 				else
-					lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\r\n";
+					lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\t\t\r\n";
 				inst.add(lIns);
 				if(mal)
 					inst.clear();
@@ -1370,10 +1370,10 @@ public int contError()
 }
 
 public void archivoObjeto(Vector<String> ins){
-	String archivobjeto,nombre;
+	String archivobjeto,nombre, tipo, dato="", s,check,direccion, codop, comaq;
+	int dir=0,conloc=0,tam;
 	File f=new File(ruta);
 	nombre=ruta.substring(0,1)+": "+f.getName()+'\n';
-	System.out.println(nombre+" ");
 	archivobjeto=ruta.substring(0,ruta.indexOf('.'))+".OBJ";
 	
 	File obj = new File(archivobjeto);
@@ -1383,7 +1383,6 @@ public void archivoObjeto(Vector<String> ins){
 		BufferedWriter archiobj = new BufferedWriter(new FileWriter(new File(archivobjeto), true));
 		for(int i=0;i<ins.size();i++)
 		{
-			String tipo, tam, dir, dato="", s,check,direccion, codop, comaq;
 			StringTokenizer st = new StringTokenizer(ins.elementAt(i),"\t");
 			st.nextToken();
 			direccion=st.nextToken();
@@ -1391,17 +1390,16 @@ public void archivoObjeto(Vector<String> ins){
 			codop=st.nextToken();
 			st.nextToken();
 			st.nextToken();
-			comaq=st.nextToken();
-			
+			comaq=st.nextToken().trim();
+			System.out.println(ins.elementAt(i)+" dato "+dato);
 			if(codop.toUpperCase().equals("ORG"))
 			{   
 				tipo="S0";
-				dir="0000";
+				dir=0;
 				boolean sigue=true;
 				int cont=0;
 				while(sigue)
 				{
-					dato="";
 					for(int j=0;j<16 && cont<nombre.length();j++)
 					{
 						String d=convertirHexa(""+(int)nombre.charAt(cont),1);
@@ -1409,17 +1407,97 @@ public void archivoObjeto(Vector<String> ins){
 						dato+=d;
 						cont ++;
 					}
-					
 					if(cont<nombre.length())
 						sigue=true;
 					else
-						sigue=false;
-					
-					tam=convertirHexa(""+((dato.length()/2)+3),1);
-					s=tipo+tam+dir+dato+calculaCheck(tam+dir+dato);
+						sigue=false;					
+					tam=((dato.length()/2)+3);
+					s=tipo+convertirHexa(""+tam,1)+convertirHexa(""+dir,2)+dato+calculaCheck(tam+dir+dato);
 					archiobj.write(s+"\r\n");
-					System.out.println(dato+"  "+ s +"tam"+ ((dato.length()/2)+3));
+					System.out.println(dato+"  "+ s +" tam "+ ((dato.length()/2)+3));
+					dato="";
 				}				
+			}
+			else
+			if(comaq.length()>0)
+			{
+				tipo="S1";
+				if(dato.length()==0)
+				{
+					dir=Integer.parseInt(direccion,16);
+					conloc=dir;	
+				}
+				
+				if(comaq.length()<=(32-dato.length()))
+				{
+					conloc+=(comaq.length()/2);
+					dato+=comaq;
+				}
+				else
+				{
+					int tfal=32-dato.length();
+					System.out.println("tfal "+tfal+"dato "+dato.length());
+					conloc+=(comaq.substring(0,tfal).length()/2);
+					dato+=comaq.substring(0,tfal);
+					System.out.println(comaq.substring(0,tfal)+".");
+					comaq.substring(0,tfal);
+					tam=(dato.length()/2+3);
+					s=tipo+convertirHexa(""+tam,1)+convertirHexa(""+dir,2)+dato+calculaCheck(convertirHexa(""+tam,1)+convertirHexa(""+dir,2)+dato);
+					archiobj.write(s+"\r\n");
+					System.out.println(s);
+					dir=conloc;
+					dato="";
+					boolean sigue=true;
+					int cont=tfal;
+					System.out.println(comaq);
+					System.out.println(comaq.substring(0,tfal)+"  "+comaq.substring(tfal));
+					while(sigue)
+					{
+						for(int j=0;j<16 && cont<comaq.length();j++)
+						{
+							String d=""+comaq.charAt(cont)+comaq.charAt(cont+1);
+							System.out.println("d  "+d);
+							dato+=d;
+							cont+=2;		
+						}	
+						conloc+=dato.length()/2;
+						if(cont<comaq.length())
+							sigue=true;
+							else
+								sigue=false;
+						if(dato.length()==32)
+						{
+							tam=((dato.length()/2)+3);
+							System.out.println(dato+" tam "+ ((dato.length()/2)+3)+" tam "+convertirHexa(""+tam,1)+" dir "+convertirHexa(""+dir,2));
+							s=tipo+convertirHexa(""+tam,1)+convertirHexa(""+dir,2)+dato+calculaCheck(convertirHexa(""+tam,1)+convertirHexa(""+dir,2)+dato);
+							archiobj.write(s+"\r\n");
+							dir=conloc;
+							dato="";	
+						}					
+					}
+						
+				}
+				
+				if(dato.length()==32|| i==(ins.size()-2))
+				{
+					tam=(dato.length()/2+3);
+					s=tipo+convertirHexa(""+tam,1)+convertirHexa(""+dir,2)+dato+calculaCheck(convertirHexa(""+tam,1)+convertirHexa(""+dir,2)+dato);
+					archiobj.write(s+"\r\n");
+					System.out.println(s);
+					dato="";
+				}		
+			}
+			else
+			{
+				if(dato.length()>0)
+				{
+					tipo="s1";
+					tam=(dato.length()/2+3);
+					s=tipo+convertirHexa(""+tam,1)+convertirHexa(""+dir,2)+dato+calculaCheck(convertirHexa(""+tam,1)+convertirHexa(""+dir,2)+dato);
+					archiobj.write(s+"\r\n");
+					System.out.println(s);
+					dato="";	
+				}	
 			}			
 		}
 		archiobj.write("S9030000FC");
@@ -1436,6 +1514,7 @@ public String calculaCheck(String cadena){
 	for(int i=0;i<cadena.length();i+=2)
 	{	
 		String car=(""+cadena.charAt(i)+cadena.charAt(i+1));
+		System.out.println("car "+car+",");
 		suma+=Integer.parseInt(car,16);
 	}
 	return convertirHexa(""+~suma,1);
