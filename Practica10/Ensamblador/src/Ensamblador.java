@@ -802,11 +802,10 @@ public boolean buscarEti(String eti,String archiT)
                 		encon=true;
                 }
                 archi.close();
-        }
-        catch(IOException e)
-        {
-                System.out.println("Error al abrir archivo TDS");
-        }
+            }
+            catch(IOException e){
+            	System.out.println("Error al abrir archivo TDS");
+        	}
         return encon;
 }
 
@@ -820,7 +819,7 @@ public boolean buscarEti2(String eti)
 		if(etiq.equals(eti))
 			return true;
 	}
-        return false;
+	return false;
 }
 
 public Vector<String> revisarInst(Vector<String> ins)
@@ -882,7 +881,6 @@ public Vector<String> guardaInst(){
 		catch(IOException e){
 			System.out.println("Error al abrir archivo de instrucciones");
 		}
-
 		return ins;
 }
 
@@ -944,7 +942,7 @@ public Vector<String> recalConLoc(Vector<String> inst,int mal){
            				ins.add(lIns);
            				if(!etiqueta.equals("NULL"))
            					tabSim.add(etiqueta+"\t\t"+valor+"\t\t\r\n");
-           		}
+           	}
 	}
 	return ins;
 }
@@ -992,7 +990,6 @@ public int tamIns(String codop,String operando,String modir){
 							Modos m=new Modos();
 							tam=m.convertirDecimal(operando)*2;
 						}
-
 			bcod=true;
 		}
 	}
@@ -1090,9 +1087,8 @@ public Vector<String> calcularCM(Vector<String> ins){
 							else{
 								comaq+=convertirHexa(""+(int) operando.charAt(i),1);
 								System.out.println(operando.charAt(i)+","+convertirHexa(""+(int) operando.charAt(i),1));
-
 							}
-								}
+						}
 					}
 			for(int i=0; i<tabop.size() && !bcod; i++)
 			{
@@ -1240,7 +1236,6 @@ public Vector<String> calcularCM(Vector<String> ins){
 														rr=regresaRr(oper2);
 														xb="111"+rr+"111";
 														comaq=ta.comaq.elementAt(j)+convertirHexa("%"+xb,1);
-
 													}
 													else
 														if(modir.equals("REL8"))
@@ -1252,7 +1247,6 @@ public Vector<String> calcularCM(Vector<String> ins){
 																rr=Integer.parseInt(valorEti(operando),16);
 																rr=rr-(Integer.parseInt(valor,16)+2);
 															}
-
 															else
 																rr=m.convertirDecimal(operando)-(Integer.parseInt(valor,16)+2);
 																if(rr>=-128 && rr<=127){
@@ -1293,7 +1287,6 @@ public Vector<String> calcularCM(Vector<String> ins){
 																	mal=true;
 																}
 															}
-
 							lIns=Integer.parseInt(linea_)+"\t"+valor+"\t"+etiqueta+"\t"+codop+"\t"+operando+"\t"+modir+"\t"+comaq+"\t\t\r\n";
 				}
 				else
@@ -1427,7 +1420,6 @@ public void archivoObjeto(Vector<String> ins){
 					dir=Integer.parseInt(direccion,16);
 					conloc=dir;	
 				}
-				
 				if(comaq.length()<=(32-dato.length()))
 				{
 					conloc+=(comaq.length()/2);
@@ -1474,10 +1466,8 @@ public void archivoObjeto(Vector<String> ins){
 							dir=conloc;
 							dato="";	
 						}					
-					}
-						
-				}
-				
+					}			
+				}	
 				if(dato.length()==32|| i==(ins.size()-2))
 				{
 					tam=(dato.length()/2+3);
@@ -1502,10 +1492,10 @@ public void archivoObjeto(Vector<String> ins){
 		}
 		archiobj.write("S9030000FC");
 		archiobj.close();
-                     }
-            catch(IOException e){
-            	System.out.println("Error al crear archivo de instrucciones");
-            }
+	}
+	catch(IOException e){
+		System.out.println("Error al crear archivo de instrucciones");
+	}
 }
 
 public String calculaCheck(String cadena){
